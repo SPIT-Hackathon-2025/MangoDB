@@ -20,6 +20,7 @@
     "@lottiefiles/dotlottie-react": "^0.6.5",
     "@lottiefiles/react-lottie-player": "^3.6.0",
     "@mapbox/polyline": "^1.2.1",
+    "@react-native-community/blur": "^4.4.1",
     "@react-native-firebase/app": "^21.7.2",
     "@react-native-firebase/messaging": "^21.7.2",
     "@react-native-picker/picker": "^2.11.0",
