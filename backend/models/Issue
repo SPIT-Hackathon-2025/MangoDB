@@ -1,0 +1,11 @@
+const mongoose = require("mongoose");
+
+const issueSchema = new mongoose.Schema({
+  description: { type: String, required: true },
+  location: { type: Object, required: true },  // Assuming location is an object
+  imageUrl: { type: String, required: true }
+});
+
+const Issue = mongoose.model("Issue", issueSchema);
+
+module.exports = Issue;
