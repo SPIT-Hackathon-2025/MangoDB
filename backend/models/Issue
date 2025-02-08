@@ -2,7 +2,17 @@ const mongoose = require("mongoose");
 
 const issueSchema = new mongoose.Schema({
   description: { type: String, required: true },
-  location: { type: Object, required: true },  // Assuming location is an object
+  location: { 
+    type: Object, 
+    required: true, 
+    // Store latitude and longitude as an object
+    // Example: { latitude: 12.9716, longitude: 77.5946 }
+  },
+  address: { 
+    type: String, 
+    required: true, 
+    // Store the human-readable address (e.g., "Bangalore, Karnataka, India")
+  },
   imageUrl: { type: String, required: true }
 });
 

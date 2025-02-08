@@ -113,7 +113,7 @@ const IssueScreen = () => {
                 )}
                 <View className="flex-1">
                   <Text className="text-xs text-gray-500 mb-1">
-                    {item.location?.latitude.toFixed(4)}, {item.location?.longitude.toFixed(4)}
+                    {item.address}
                   </Text>
                   <Text className="text-gray-900 text-sm mb-2">
                     {item.description || 'No description provided'}
