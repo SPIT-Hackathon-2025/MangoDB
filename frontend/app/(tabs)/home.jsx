@@ -228,7 +228,7 @@ const IssueScreen = () => {
         transparent={true}
         onRequestClose={() => setModalVisible(false)}
       >
-        <View className="flex-1 justify-center items-center bg-black bg-opacity-50">
+        <View className="flex-1 justify-center items-center bg-black/70">
           <View className="bg-white rounded-3xl w-11/12 max-h-[80%] m-6">
             <View className="px-6 pt-6 pb-4 border-b border-gray-200 flex-row justify-between items-center">
               <Text className="text-xl font-semibold text-gray-900">
