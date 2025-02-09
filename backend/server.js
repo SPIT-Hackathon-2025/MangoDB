@@ -6,6 +6,7 @@ const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 const Issue = require("./models/Issue");
+const found = require("./models/found");
 const { createServer } = require("http");
 const { Server } = require("socket.io");
 const { reverseGeocode } = require("./services/location");
@@ -154,6 +155,58 @@ app.post("/api/report-issue", upload.single("image"), async (req, res) => {
   } catch (error) {
     console.error("Error handling report:", error.message);
     res.status(500).json({ error: "Issue reporting error" });
+  }
+});
+
+// Route to handle item found
+app.post("/api/item-found", upload.single("image"), async (req, res) => {
+  try {
+    console.log("Request received");
+    console.log("Body:", req.body); // Log form fields (description, location)
+    console.log("File:", req.file); // Log file data
+
+    // Ensure required data is received
+    if (!req.body.description || !req.body.location || !req.file) {
+      return res.status(400).json({
+        error:
+          "Please provide all required details (description, location, image)",
+      });
+    }
+
+    // Process the received data
+    const { description, location } = req.body;
+    const { path: imagePath } = req.file; // File path for the uploaded image
+
+    // Parse location to get latitude and longitude
+    const parsedLocation = JSON.parse(location); // location should be a stringified object
+    console.log(location)
+    const { latitude, longitude } = parsedLocation;
+    
+
+    // Get the actual address from latitude and longitude using reverse geocoding
+    const address = await reverseGeocode(latitude, longitude);
+
+    // If reverse geocoding fails
+    if (!address) {
+      return res.status(500).json({ error: "Could not retrieve address from coordinates" });
+    }
+
+    // Create a new issue object with the address
+    const newFound = new found({
+      description,
+      location: parsedLocation, // Store latitude and longitude
+      address, // Store the human-readable address
+      imageUrl: imagePath, // You can store the image path or URL here
+    });
+
+    // Save the issue to the database
+    await newFound.save();
+
+    // Send a success response
+    res.status(200).json({ message: "Issue reported successfully" });
+  } catch (error) {
+    console.error("Error handling the report:", error.message);
+    res.status(500).json({ error: "There was an issue reporting the problem" });
   }
 });
 

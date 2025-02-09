@@ -112,19 +112,19 @@ export default function EventPage() {
       </View>
 
       {/* Event Description */}
-      <View className="px-6 py-4 bg-white border-b border-gray-200">
+      {/* <View className="px-6 py-4 bg-white border-b border-gray-200">
         <Text className="text-gray-600">{event.description}</Text>
-      </View>
+      </View> */}
 
       {/* Chat Area */}
       <View className="flex-1 bg-gray-50">
-        <View className="px-6 py-3 bg-emerald-700">
+        <View className="px-6 py-3 bg-emerald-700  rounded-b-2xl">
           <Text className="text-white font-semibold">Event Chat</Text>
-          {connected ? (
+          {/* {connected ? (
             <Text className="text-emerald-100 text-xs">Connected as {username}</Text>
           ) : (
             <Text className="text-red-200 text-xs">Connecting...</Text>
-          )}
+          )} */}
         </View>
 
         <ScrollView
@@ -181,7 +181,7 @@ export default function EventPage() {
               onPress={sendMessage}
               disabled={!connected}
             >
-              <MaterialIcons name="send" size={24} color="white" />
+              <MaterialIcons name="send" size={18} color="white" />
             </TouchableOpacity>
           </View>
         </KeyboardAvoidingView>
