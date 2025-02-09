@@ -25,35 +25,43 @@ const LostScreen = () => {
       Alert.alert("Error", "Please provide all the details");
       return;
     }
-
-    const formData = new FormData();
-    formData.append("description", description);
-    formData.append("location", JSON.stringify(location));
-    formData.append(
-      "question"
-      );
-
+  
     try {
-      await axios.post(
-        "https://d7da-103-104-226-58.ngrok-free.app/api/item-lost",
-        formData,
+      // Create request body as a plain object
+      const requestBody = {
+        description: description,
+        location: location  // This is already an object with latitude and longitude
+      };
+  
+      console.log("Sending data:", requestBody); // Debug log
+  
+      const response = await axios.post(
+        "https://8e96-103-104-226-58.ngrok-free.app/api/item-lost",
+        requestBody,
         {
-          headers: { "Content-Type": "multipart/form-data" },
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
         }
       );
-      Alert.alert("Success", formattedData);
+  
+      console.log("Response:", response.data); // Debug log
+      Alert.alert("Success", "Item reported successfully");
       setModalVisible(false);
       fetchItems();
     } catch (error) {
+      console.error("Error details:", error.response?.data || error.message);
       Alert.alert("Error", "There was an issue reporting the problem");
     }
   };
-
   const fetchItems = async () => {
     try {
+      console.log("Fetching items...");
       const response = await axios.get(
-        "https://d7da-103-104-226-58.ngrok-free.app/api/items"
+        "https://8e96-103-104-226-58.ngrok-free.app/api/items"
       );
+      console.log("Items:", response.data);
       setItems(response.data);
     } catch (error) {
       console.error("Error fetching items:", error);
@@ -82,13 +90,13 @@ const LostScreen = () => {
             className="bg-emerald-50 p-6 rounded-2xl border-2 border-emerald-200 shadow-sm"
           >
             <Text className="text-xl font-semibold text-emerald-900 mb-2">
-              Report an Issue
+              Tag your Lost Item
             </Text>
             <Text className="text-emerald-700 text-sm mb-4">
-              Help improve your community by reporting items
+              Look for you lost items here
             </Text>
             <View className="bg-emerald-800 self-start px-6 py-3 rounded-xl">
-              <Text className="text-white font-medium">New Report</Text>
+              <Text className="text-white font-medium">New Log</Text>
             </View>
           </TouchableOpacity>
         </View>
@@ -96,7 +104,7 @@ const LostScreen = () => {
         {/* Items List */}
         <View className="px-6">
           <Text className="text-lg font-semibold text-gray-900 mb-4">
-            Recent Reports
+            Recent Items Found
           </Text>
           {items.map((item) => (
             <View
@@ -107,7 +115,7 @@ const LostScreen = () => {
                 {item.imageUrl && (
                   <Image
                     source={{
-                      uri: `https://d7da-103-104-226-58.ngrok-free.app/${item.imageUrl}`,
+                      uri: `https://8e96-103-104-226-58.ngrok-free.app/${item.imageUrl}`,
                     }}
                     className="w-20 h-20 rounded-lg mr-4"
                   />
