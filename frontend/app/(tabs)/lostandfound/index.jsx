@@ -32,7 +32,7 @@ export default function LostAndFound() {
     try {
       console.log("Sending data:", { description, location }); // Debug log
       const response = await axios.post(
-        "https://3329-103-104-226-58.ngrok-free.app/api/item-lost",
+        "https://666c-103-104-226-58.ngrok-free.app/api/item-lost",
         {
           description,
           location,
@@ -45,7 +45,7 @@ export default function LostAndFound() {
         }
       );
       const res = await axios.post(
-        "https://3329-103-104-226-58.ngrok-free.app/api/found/query",
+        "https://666c-103-104-226-58.ngrok-free.app/api/found/query",
         {
           description,
         },
@@ -59,14 +59,31 @@ export default function LostAndFound() {
       console.log("thi is res", res.data);
 
       console.log("Response:", response.data); // Debug log
-      Alert.alert("Success", "Lost item reported successfully");
+      if (Array.isArray(res.data) && res.data.length > 0) {
+        const foundItems = res.data
+          .map(
+            (item, index) =>
+              `Match ${index + 1}:\nOwner: ${item.match["Person Name"]
+              }\nContact: ${item.match["Contact"]}\n`
+          )
+          .join("\n");
+
+        Alert.alert(
+          "Potential Matches Found!",
+          `Here are possible matches for your lost item:\n\n${foundItems}`
+        );
+      } else {
+        Alert.alert("Success", "Lost item reported successfully, but no matches found.");
+      }
+
+
       setModalVisible(false);
     } catch (error) {
       console.error("Error details:", error.response?.data || error.message);
       Alert.alert(
         "Error",
         error.response?.data?.error ||
-          "There was an issue reporting the problem"
+        "There was an issue reporting the problem"
       );
     }
   };

@@ -89,6 +89,20 @@ export default function TravelLayout() {
                     },
                 }} 
             />
+            <Stack.Screen 
+                name="emergency" 
+                options={{
+                    headerTitle: 'Emergency',
+                    headerTitleAlign: 'center',
+                    headerStyle: {
+                        height: 80,
+                    },
+                    headerTitleStyle: {
+                        fontSize: 18,
+                        fontWeight: 'bold',
+                    },
+                }} 
+            />
         </Stack>
     );
 }

@@ -33,7 +33,7 @@ const LostScreen = () => {
         location: location, // This is already an object with latitude and longitude
       };
       const response = await axios.post(
-        "https://3329-103-104-226-58.ngrok-free.app/api/item-lost",
+        "https://666c-103-104-226-58.ngrok-free.app/api/item-lost",
         requestBody,
         {
           headers: {
@@ -55,7 +55,7 @@ const LostScreen = () => {
   const fetchItems = async () => {
     try {
       const response = await axios.get(
-        "https://3329-103-104-226-58.ngrok-free.app/api/items"
+        "https://666c-103-104-226-58.ngrok-free.app/api/items"
       );
       setItems(response.data);
     } catch (error) {
@@ -110,7 +110,7 @@ const LostScreen = () => {
                 {item.imageUrl && (
                   <Image
                     source={{
-                      uri: `https://3329-103-104-226-58.ngrok-free.app/${item.imageUrl}`,
+                      uri: `https://666c-103-104-226-58.ngrok-free.app/${item.imageUrl}`,
                     }}
                     className="w-20 h-20 rounded-lg mr-4"
                   />

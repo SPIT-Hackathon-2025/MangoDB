@@ -164,14 +164,14 @@ const IssueScreen = () => {
 
     try {
       await axios.post(
-        "https://cdbf-103-104-226-58.ngrok-free.app/api/report-issue",
+        "https://666c-103-104-226-58.ngrok-free.app/api/report-issue",
         formData,
         {
           headers: { "Content-Type": "multipart/form-data" },
         }
       );
       const ans = await axios.post(
-        "https://cdbf-103-104-226-58.ngrok-free.app/llm/query",
+        "https://666c-103-104-226-58.ngrok-free.app/llm/query",
         {
           query: description,
         }
@@ -194,7 +194,7 @@ const IssueScreen = () => {
   const fetchIssues = async () => {
     try {
       const response = await axios.get(
-        "https://cdbf-103-104-226-58.ngrok-free.app/api/issues"
+        "https://666c-103-104-226-58.ngrok-free.app/api/issues"
       );
       setIssues(response.data);
     } catch (error) {
@@ -218,7 +218,7 @@ const IssueScreen = () => {
 
     try {
       const response = await axios.post(
-        "https://cdbf-103-104-226-58.ngrok-free.app/gemini",
+        "https://666c-103-104-226-58.ngrok-free.app/gemini",
         formData,
         {
           headers: {
@@ -281,7 +281,7 @@ const IssueScreen = () => {
 
         {/* Issues List */}
         <View className="px-6">
-        <View className="flex-row justify-between items-center mb-4">
+        {/* <View className="flex-row justify-between items-center mb-4">
             <Text className="text-lg font-semibold text-gray-900">Alarm</Text>
             <TouchableOpacity
               onPress={()=>{socketRef.current.emit("sendForumMessage", {'username':'user',
@@ -291,7 +291,7 @@ const IssueScreen = () => {
             >
               <Text className="text-white text-sm">Alarm Button</Text>
             </TouchableOpacity>
-          </View>
+          </View> */}
           <View className="flex-row justify-between items-center mb-4">
             <Text className="text-lg font-semibold text-gray-900">Recent Reports</Text>
             <TouchableOpacity
@@ -311,7 +311,7 @@ const IssueScreen = () => {
                 {item.imageUrl && (
                   <Image
                     source={{
-                      uri: `https://cdbf-103-104-226-58.ngrok-free.app/${item.imageUrl}`,
+                      uri: `https://666c-103-104-226-58.ngrok-free.app/${item.imageUrl}`,
                     }}
                     className="w-20 h-20 rounded-lg mr-4"
                   />

@@ -271,7 +271,7 @@ const MapScreen = () => {
                 pinColor={index === 0 ? "green" : "black"}
                 onPress={() => {
                   Alert.alert(
-                    "Street View",
+                    "Pokestop View",
                     "Would you like to view this location in Street View?",
                     [
                       { text: "Cancel", style: "cancel" },
@@ -295,7 +295,7 @@ const MapScreen = () => {
                 pinColor={index === decodedLegs.length - 1 ? "red" : "black"}
                 onPress={() => {
                   Alert.alert(
-                    "Street View",
+                    "Pokestop View",
                     "Would you like to view this location in Street View?",
                     [
                       { text: "Cancel", style: "cancel" },
