@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -15,6 +15,17 @@ import CaptureImage from "../../../components/ui/CaptureImage";
 import LocationPicker from "../../../components/ui/LocationPicker";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { useRouter } from "expo-router";
+import io from "socket.io-client";
+import * as Notifications from "expo-notifications";
+import * as Device from "expo-device";
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: true,
+  }),
+});
 
 const IssueScreen = () => {
   const [imageUri, setImageUri] = useState(null);
@@ -23,6 +34,114 @@ const IssueScreen = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [issues, setIssues] = useState([]);
   const router = useRouter();
+    const [isConnected, setIsConnected] = useState(false);
+    const [userCount, setUserCount] = useState(0);
+    const [expoPushToken, setExpoPushToken] = useState("");
+    const socketRef = useRef(null);
+    const notificationListener = useRef();
+    const responseListener = useRef();
+  
+
+    useEffect(() => {
+      if (!socketRef.current) {
+        socketRef.current = io("http://10.10.121.39:5001", {
+          transports: ['websocket'],
+          reconnection: true,
+        });
+      }
+  
+      const socket = socketRef.current;
+  
+      socket.on('connect', () => {
+        setIsConnected(true);
+        console.log("Socket connected");
+      });
+      
+      socket.on('disconnect', () => {
+        setIsConnected(false);
+        console.log("Socket disconnected");
+      });
+      
+      socket.on("receiveForumMessage", async (newMessage) => {
+        console.log("New message received:", newMessage);
+        await scheduleNotification(newMessage);
+        setForumMessages(prev => [...prev, newMessage]);
+      });
+      
+      socket.on("userCount", count => {
+        console.log("User count updated:", count);
+        setUserCount(count);
+      });
+      
+      socket.on("receiveNotification", ({ title, message }) => {
+        console.log("Notification received from socket:", { title, message });
+        Alert.alert(title, message);
+      });
+  
+      return () => {
+        socket.off("receiveForumMessage");
+        socket.off("receiveNotification");
+        socket.off("connect");
+        socket.off("disconnect");
+        socket.off("userCount");
+      };
+    }, []);
+
+  // Function to register for push notifications
+    async function registerForPushNotificationsAsync() {
+      let token;
+  
+      if (Platform.OS === 'android') {
+        await Notifications.setNotificationChannelAsync('default', {
+          name: 'default',
+          importance: Notifications.AndroidImportance.MAX,
+          vibrationPattern: [0, 250, 250, 250],
+          lightColor: '#FF231F7C',
+        });
+      }
+  
+      if (Device.isDevice) {
+        const { status: existingStatus } = await Notifications.getPermissionsAsync();
+        let finalStatus = existingStatus;
+        
+        if (existingStatus !== 'granted') {
+          const { status } = await Notifications.requestPermissionsAsync();
+          finalStatus = status;
+        }
+        
+        if (finalStatus !== 'granted') {
+          Alert.alert('Failed', 'Failed to get push token for push notification!');
+          return;
+        }
+        
+        token = (await Notifications.getExpoPushTokenAsync()).data;
+      } else {
+        Alert.alert('Must use physical device', 'Push notifications require a physical device');
+      }
+  
+      return token;
+    }
+  
+    // Schedule a notification
+    const scheduleNotification = async (messageData) => {
+      try {
+        await Notifications.scheduleNotificationAsync({
+          content: {
+            title: `New message from ${messageData.username}`,
+            body: messageData.message,
+            data: { messageData },
+            sound: true,
+            priority: Notifications.AndroidNotificationPriority.HIGH,
+          },
+          trigger: { seconds: 1 },
+        });
+        console.log("Notification scheduled successfully");
+      } catch (error) {
+        console.error("Error scheduling notification:", error);
+        Alert.alert("Notification Error", "Failed to schedule notification");
+      }
+    };
+  
 
   const handleSubmit = async () => {
     if (!imageUri || !location || !description) {
@@ -62,6 +181,9 @@ const IssueScreen = () => {
         .join("\n\n");
 
       Alert.alert("Success", formattedData);
+      // socketRef.current.emit("sendForumMessage", {'username':'user',
+      //   'message':'New Report',
+      //   'timestamp': new Date().toISOString()})
       setModalVisible(false);
       fetchIssues();
     } catch (error) {
@@ -159,6 +281,17 @@ const IssueScreen = () => {
 
         {/* Issues List */}
         <View className="px-6">
+        <View className="flex-row justify-between items-center mb-4">
+            <Text className="text-lg font-semibold text-gray-900">Alarm</Text>
+            <TouchableOpacity
+              onPress={()=>{socketRef.current.emit("sendForumMessage", {'username':'user',
+                'message':'Alert',
+                'timestamp': new Date().toISOString()})}}
+              className="bg-emerald-800 px-4 py-2 rounded-xl"
+            >
+              <Text className="text-white text-sm">Alarm Button</Text>
+            </TouchableOpacity>
+          </View>
           <View className="flex-row justify-between items-center mb-4">
             <Text className="text-lg font-semibold text-gray-900">Recent Reports</Text>
             <TouchableOpacity
