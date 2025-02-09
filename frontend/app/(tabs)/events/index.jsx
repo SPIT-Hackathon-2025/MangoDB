@@ -14,53 +14,78 @@ import { router } from "expo-router";
 const initialEvents = [
   {
     id: 1,
-    title: "Tech Conference 2025",
+    title: "Beach Cleanup Drive",
     date: "March 15, 2025",
-    location: "Convention Center",
-    description: "Annual technology conference featuring latest innovations",
-    icon: "computer",
-    attendees: 156,
-    interested: 243,
+    location: "Marine Beach",
+    description: "Join us in removing plastic waste and keeping our beaches clean!",
+    icon: "cleaning-services",
+    attendees: 120,
+    interested: 200,
     bgColor: "bg-blue-100",
     iconColor: "text-blue-600",
   },
   {
     id: 2,
-    title: "Startup Meetup",
-    date: "March 20, 2025",
-    location: "Innovation Hub",
-    description: "Networking event for startup founders and entrepreneurs",
-    icon: "groups",
-    attendees: 89,
-    interested: 134,
-    bgColor: "bg-purple-100",
-    iconColor: "text-purple-600",
-  },
-  {
-    id: 3,
-    title: "Coding Workshop",
-    date: "March 25, 2025",
-    location: "Tech Campus",
-    description: "Hands-on coding workshop for developers",
-    icon: "code",
-    attendees: 45,
-    interested: 98,
+    title: "Tree Plantation Campaign",
+    date: "March 22, 2025",
+    location: "City Park",
+    description: "Let's plant trees to fight climate change and beautify our community.",
+    icon: "park",
+    attendees: 95,
+    interested: 180,
     bgColor: "bg-green-100",
     iconColor: "text-green-600",
   },
   {
+    id: 3,
+    title: "Recycling Awareness Workshop",
+    date: "March 30, 2025",
+    location: "Community Hall",
+    description: "Learn effective recycling techniques and sustainable waste management.",
+    icon: "recycling",
+    attendees: 60,
+    interested: 110,
+    bgColor: "bg-yellow-100",
+    iconColor: "text-yellow-600",
+  },
+  {
     id: 4,
-    title: "AI Summit 2025",
-    date: "April 5, 2025",
-    location: "Digital Arena",
-    description: "Exploring the future of artificial intelligence and machine learning",
-    icon: "psychology",
-    attendees: 201,
-    interested: 322,
+    title: "Public Transport Promotion Week",
+    date: "April 5 - April 12, 2025",
+    location: "Citywide",
+    description: "Encouraging eco-friendly transport solutions to reduce carbon emissions.",
+    icon: "directions-bus",
+    attendees: 300,
+    interested: 500,
     bgColor: "bg-orange-100",
     iconColor: "text-orange-600",
   },
+  {
+    id: 5,
+    title: "Eco-Friendly Product Fair",
+    date: "April 15, 2025",
+    location: "Town Square",
+    description: "Discover sustainable products and support local green businesses.",
+    icon: "shopping-bag",
+    attendees: 150,
+    interested: 250,
+    bgColor: "bg-purple-100",
+    iconColor: "text-purple-600",
+  },
+  {
+    id: 6,
+    title: "Urban Gardening Workshop",
+    date: "April 20, 2025",
+    location: "Green Hub",
+    description: "Learn how to create your own urban garden and grow organic food.",
+    icon: "grass",
+    attendees: 75,
+    interested: 130,
+    bgColor: "bg-teal-100",
+    iconColor: "text-teal-600",
+  },
 ];
+
 
 const EventCard = ({ event, toggleInterest }) => {
   return (
@@ -202,8 +227,8 @@ export default function Events() {
         contentContainerStyle={{ paddingBottom: 40 }}
       >
         {/* Header Section */}
-        <View className="bg-emerald-800 px-6 pt-10 pb-14 rounded-b-3xl shadow-md">
-          <Text className="text-white text-3xl font-bold mb-1">Events</Text>
+        <View className="bg-[#03543F] px-6 pt-10 pb-14 rounded-b-3xl shadow-md">
+          <Text className="text-white text-3xl font-bold mb-1">Make a change!</Text>
           <Text className="text-green-100 text-lg">Discover and join exciting gatherings</Text>
         </View>
 
