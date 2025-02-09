@@ -11,17 +11,17 @@ import {
   ScrollView,
 } from "react-native";
 import axios from "axios";
-import CaptureImage from "../../components/ui/CaptureImage";
-import LocationPicker from "../../components/ui/LocationPicker";
+import CaptureImage from "../../../components/ui/CaptureImage";
+import LocationPicker from "../../../components/ui/LocationPicker";
 import Icon from "react-native-vector-icons/FontAwesome";
-
+import { useRouter } from "expo-router";
 const IssueScreen = () => {
   const [imageUri, setImageUri] = useState(null);
   const [location, setLocation] = useState(null);
   const [description, setDescription] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
   const [issues, setIssues] = useState([]);
-
+  const router = useRouter();
   const handleSubmit = async () => {
     if (!imageUri || !location || !description) {
       Alert.alert("Error", "Please provide all the details");
@@ -219,6 +219,14 @@ const IssueScreen = () => {
             </View>
           ))}
         </View>
+        <View className="px-6 py-4">
+          <TouchableOpacity
+            onPress={() => router.push("/(tabs)/home/mapview")}
+            className="bg-blue-500 p-4 rounded-xl items-center"
+          >
+            <Text className="text-white text-lg">Go to Map View</Text>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
 
       {/* Improved Modal - Compact */}
@@ -307,3 +315,4 @@ const IssueScreen = () => {
 };
 
 export default IssueScreen;
+
