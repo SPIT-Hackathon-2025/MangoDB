@@ -13,7 +13,7 @@ const MapScreen = () => {
       try {
         // Replace this with your actual API endpoint
         const response = await axios.get(
-          "https://3329-103-104-226-58.ngrok-free.app.app/api/issues"
+          "https://cdbf-103-104-226-58.ngrok-free.app/api/issues"
         );
         setIssues(response.data);
       } catch (error) {

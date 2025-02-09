@@ -44,7 +44,7 @@ const IssueScreen = () => {
 
     useEffect(() => {
       if (!socketRef.current) {
-        socketRef.current = io("http://10.10.121.39:5001", {
+        socketRef.current = io("http://10.10.121.89:5001", {
           transports: ['websocket'],
           reconnection: true,
         });
@@ -159,19 +159,19 @@ const IssueScreen = () => {
     formData.append("location", JSON.stringify(location));
     formData.append(
       "question",
-      "generate a short description of the problem in the image. by problem i mean one which needs complaining to respective authority that can solve it. Only print what problem is present in the image. Do not give any type pf JSON Data. Do not give a preamble or postamble to it. Do not include info about the respective authority as well if such problem is not present in the image, just output 'no.'"
+      "Describe the image as if someone is reporting a problem to an authority. Focus on the key issue being reported. Be concise and avoid any introductory or concluding remarks.  Do not include any JSON data or preamble/postamble.  Do not mention the image itself or that you are describing it.  Just state the problem as a report."
     );
 
     try {
       await axios.post(
-        "https://3329-103-104-226-58.ngrok-free.app/api/report-issue",
+        "https://cdbf-103-104-226-58.ngrok-free.app/api/report-issue",
         formData,
         {
           headers: { "Content-Type": "multipart/form-data" },
         }
       );
       const ans = await axios.post(
-        "https://3329-103-104-226-58.ngrok-free.app/llm/query",
+        "https://cdbf-103-104-226-58.ngrok-free.app/llm/query",
         {
           query: description,
         }
@@ -181,9 +181,9 @@ const IssueScreen = () => {
         .join("\n\n");
 
       Alert.alert("Success", formattedData);
-      // socketRef.current.emit("sendForumMessage", {'username':'user',
-      //   'message':'New Report',
-      //   'timestamp': new Date().toISOString()})
+      socketRef.current.emit("sendForumMessage", {'username':'user',
+        'message':'New Report',
+        'timestamp': new Date().toISOString()})
       setModalVisible(false);
       fetchIssues();
     } catch (error) {
@@ -194,7 +194,7 @@ const IssueScreen = () => {
   const fetchIssues = async () => {
     try {
       const response = await axios.get(
-        "https://3329-103-104-226-58.ngrok-free.app/api/issues"
+        "https://cdbf-103-104-226-58.ngrok-free.app/api/issues"
       );
       setIssues(response.data);
     } catch (error) {
@@ -218,7 +218,7 @@ const IssueScreen = () => {
 
     try {
       const response = await axios.post(
-        "https://3329-103-104-226-58.ngrok-free.app/gemini",
+        "https://cdbf-103-104-226-58.ngrok-free.app/gemini",
         formData,
         {
           headers: {
@@ -311,7 +311,7 @@ const IssueScreen = () => {
                 {item.imageUrl && (
                   <Image
                     source={{
-                      uri: `https://3329-103-104-226-58.ngrok-free.app/${item.imageUrl}`,
+                      uri: `https://cdbf-103-104-226-58.ngrok-free.app/${item.imageUrl}`,
                     }}
                     className="w-20 h-20 rounded-lg mr-4"
                   />
