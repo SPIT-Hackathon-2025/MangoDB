@@ -29,7 +29,7 @@ const IssueScreen = () => {
       Alert.alert("Error", "Please provide all the details");
       return;
     }
-    
+
     const formData = new FormData();
     formData.append("image", {
       uri: imageUri,
@@ -45,14 +45,14 @@ const IssueScreen = () => {
 
     try {
       await axios.post(
-        "https://cdbf-103-104-226-58.ngrok-free.app/api/report-issue",
+        "https://3329-103-104-226-58.ngrok-free.app/api/report-issue",
         formData,
         {
           headers: { "Content-Type": "multipart/form-data" },
         }
       );
       const ans = await axios.post(
-        "https://cdbf-103-104-226-58.ngrok-free.app/llm/query",
+        "https://3329-103-104-226-58.ngrok-free.app/llm/query",
         {
           query: description,
         }
@@ -72,7 +72,7 @@ const IssueScreen = () => {
   const fetchIssues = async () => {
     try {
       const response = await axios.get(
-        "https://cdbf-103-104-226-58.ngrok-free.app/api/issues"
+        "https://3329-103-104-226-58.ngrok-free.app/api/issues"
       );
       setIssues(response.data);
     } catch (error) {
@@ -96,7 +96,7 @@ const IssueScreen = () => {
 
     try {
       const response = await axios.post(
-        "https://cdbf-103-104-226-58.ngrok-free.app/gemini",
+        "https://3329-103-104-226-58.ngrok-free.app/gemini",
         formData,
         {
           headers: {
@@ -178,7 +178,7 @@ const IssueScreen = () => {
                 {item.imageUrl && (
                   <Image
                     source={{
-                      uri: `https://d7da-103-104-226-58.ngrok-free.app/${item.imageUrl}`,
+                      uri: `https://3329-103-104-226-58.ngrok-free.app/${item.imageUrl}`,
                     }}
                     className="w-20 h-20 rounded-lg mr-4"
                   />

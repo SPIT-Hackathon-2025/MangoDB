@@ -171,14 +171,15 @@ app.post("/api/item-found", upload.single("image"), async (req, res) => {
 
     if (!req.body.description || !req.body.location || !req.file) {
       return res.status(400).json({
-        error: "Please provide all required details (description, location, image)"
+        error:
+          "Please provide all required details (description, location, image)",
       });
     }
 
     const { description, location } = req.body;
     const { path: imagePath } = req.file;
 
-    const parsedLocation = JSON.parse(location);;
+    const parsedLocation = JSON.parse(location);
     const { latitude, longitude } = parsedLocation;
 
     const address = await reverseGeocode(latitude, longitude);
@@ -198,15 +199,15 @@ app.post("/api/item-found", upload.single("image"), async (req, res) => {
     const savedItem = await newFound.save();
     console.log("Saved found item:", savedItem);
 
-    res.status(200).json({ 
+    res.status(200).json({
       message: "Found item reported successfully",
-      item: savedItem 
+      item: savedItem,
     });
   } catch (error) {
     console.error("Error handling found item report:", error);
-    res.status(500).json({ 
+    res.status(500).json({
       error: "There was an error reporting the found item",
-      details: error.message 
+      details: error.message,
     });
   }
 });
@@ -283,7 +284,7 @@ app.get("/api/issues", async (req, res) => {
 app.get("/api/found-items", async (req, res) => {
   try {
     const items = await found.find();
-    console.log(items)
+    console.log(items);
     res.json(items);
   } catch (error) {
     res.status(500).json({ message: "Error fetching items", error });
@@ -293,7 +294,7 @@ app.get("/api/found-items", async (req, res) => {
 app.get("/api/lost-items", async (req, res) => {
   try {
     const items = await lost.find();
-    console.log(items)
+    console.log(items);
     res.json(items);
   } catch (error) {
     res.status(500).json({ message: "Error fetching items", error });
@@ -331,6 +332,7 @@ app.post("/api/append-csv", (req, res) => {
   });
 });
 app.post("/api/found/query", async (req, res) => {
+  console.log("Request body:", req.body);
   const { description } = req.body;
   const info = await axios.post("http://localhost:5002/query", {
     query: description,
