@@ -22,11 +22,20 @@ def search():
         if not query:
             return jsonify({"error": "Query is required"}), 400
             
-        # Search similar items
+        # Search top 2 similar items
         query_vector = encoder.encode(query).reshape(1, -1)
-        distance, indices = index.search(query_vector, k=1)
+        distances, indices = index.search(query_vector, k=2)
         
-        return jsonify({"matches": df.loc[indices[0]].to_dict(orient="records")})
+        # Prepare results
+        results = [
+            {
+                "match": df.loc[idx].to_dict()
+                # "distance": float(dist)
+            }
+            for dist, idx in sorted(zip(distances[0], indices[0]), key=lambda x: x[0])  # Sort by distance
+        ]
+        
+        return jsonify({"matches": results})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
