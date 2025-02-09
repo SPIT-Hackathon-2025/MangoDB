@@ -1,258 +1,127 @@
-import {
-    View,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    FlatList,
-  } from "react-native";
-  import React, { useState, useCallback, useEffect } from "react";
-  import { SafeAreaView } from "react-native-safe-area-context";
-  import { MaterialIcons } from "@expo/vector-icons";
-  import uuid from "react-native-uuid";
-  import axios from "axios";
-  import * as Location from "expo-location";
-  import { router } from "expo-router";
-  
-  // Debounce utility
-  const debounce = (func, delay) => {
-    let timer;
-    return (...args) => {
-      clearTimeout(timer);
-      timer = setTimeout(() => func(...args), delay);
+import React, { useState } from "react";
+import { View, Text, TouchableOpacity, ScrollView, SafeAreaView, Animated } from "react-native";
+import { useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+
+// Enhanced leaderboard data with user
+const leaderboardData = [
+  { id: 1, name: "Alice Johnson", saved: 150, isUser: false },
+  { id: 2, name: "Michael Smith", saved: 120, isUser: false },
+  { id: "user", name: "You", saved: 115, isUser: true },
+  { id: 3, name: "Emma Williams", saved: 110, isUser: false },
+  { id: 4, name: "Daniel Brown", saved: 95, isUser: false },
+  { id: 5, name: "Sophia Davis", saved: 80, isUser: false },
+].sort((a, b) => b.saved - a.saved);
+
+export default function GreenTravel() {
+  const router = useRouter();
+
+  const renderMedal = (position) => {
+    const medals = {
+      1: "🥇",
+      2: "🥈",
+      3: "🥉",
     };
+    return medals[position] || null;
   };
-  
-  const Travel = () => {
-    const [fromLocation, setFromLocation] = useState("");
-    const [toLocation, setToLocation] = useState("");
-    const [suggestions, setSuggestions] = useState([]);
-    const [activeInput, setActiveInput] = useState("");
-    const [startLatLng, setStartLatLng] = useState(null);
-    const [endLatLng, setEndLatLng] = useState(null);
-  
-    const API_KEY = process.env.EXPO_PUBLIC_ola_api; 
-    const BASE_URL = "https://api.olamaps.io/places/v1/autocomplete";
-  
-    // Fetch location suggestions
-    const fetchSuggestions = async (input) => {
-      try {
-        if (!input) {
-          setSuggestions([]);
-          return;
-        }
-  
-        const requestId = uuid.v4();
-        const correlationId = uuid.v4();
-        const response = await axios.get(BASE_URL, {
-          headers: {
-            "X-Request-Id": requestId,
-            "X-Correlation-Id": correlationId,
-            Origin: "http://localhost:8082",
-          },
-          params: { input, api_key: API_KEY },
-        });
-  
-        setSuggestions(response.data.predictions || []);
-      } catch (error) {
-        console.error("Error fetching suggestions:", error);
-      }
-    };
-  
-    const debouncedFetchSuggestions = useCallback(
-      debounce(fetchSuggestions, 300),
-      []
-    );
-  
-    const handleInputChange = (text, inputType) => {
-      if (inputType === "from") setFromLocation(text);
-      else setToLocation(text);
-  
-      setActiveInput(inputType);
-      debouncedFetchSuggestions(text);
-    };
-  
-    const handleClearInput = (inputType) => {
-      if (inputType === "from") {
-        setFromLocation("");
-        setStartLatLng(null);
-      } else {
-        setToLocation("");
-        setEndLatLng(null);
-      }
-      setSuggestions([]);
-    };
-  
-    const handleSelectSuggestion = (item) => {
-      if (activeInput === "from") {
-        setFromLocation(item.description);
-        setStartLatLng([item.geometry.location.lat, item.geometry.location.lng]);
-      } else {
-        setToLocation(item.description);
-        setEndLatLng([item.geometry.location.lat, item.geometry.location.lng]);
-      }
-      setSuggestions([]);
-    };
-  
-    const fetchCurrentLocation = async (inputType) => {
-      try {
-        const { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== "granted") {
-          alert("Permission to access location was denied.");
-          return;
-        }
-        const location = await Location.getCurrentPositionAsync({});
-        const { latitude, longitude } = location.coords;
-  
-        if (inputType === "from") {
-          setStartLatLng([latitude, longitude]);
-          setFromLocation("Current Location");
-        } else {
-          setEndLatLng([latitude, longitude]);
-          setToLocation("Current Location");
-        }
-      } catch (error) {
-        console.error("Error fetching location:", error);
-        alert("Failed to fetch current location.");
-      }
-    };
-  
-    return (
-      <SafeAreaView
-        className="min-h-full bg-background px-4 py-4"
-        edges={["left", "right"]}
+
+  return (
+    <SafeAreaView className="flex-1 bg-green-50">
+      <ScrollView 
+        className="flex-1" 
+        showsVerticalScrollIndicator={false} 
+        contentContainerStyle={{ paddingBottom: 40 }}
       >
-        <View className="bg-white shadow-lg rounded-lg mb-4 p-6">
-          {/* From Section */}
-          <View className="mb-4 relative">
-            <Text
-              className="absolute -top-3 left-4 bg-white px-1 text-gray-600 font-psemibold text-sm"
-              style={{ zIndex: 1 }}
-            >
-              From
-            </Text>
-            <View className="flex-row items-center border border-gray-300 rounded-md px-3 py-1.5">
-              <MaterialIcons
-                name="location-on"
-                size={20}
-                color="#065f46"
-                className="mr-3"
-              />
-              <TextInput
-                placeholder="Starting location"
-                value={fromLocation}
-                onChangeText={(text) => handleInputChange(text, "from")}
-                className="flex-1 text-gray-800 text-sm font-pmedium"
-                style={{ height: 40 }}
-              />
-              {fromLocation !== "" && (
-                <TouchableOpacity onPress={() => handleClearInput("from")}>
-                  <MaterialIcons name="close" size={20} color="#888" />
-                </TouchableOpacity>
-              )}
-              <TouchableOpacity
-                onPress={() => fetchCurrentLocation("from")}
-                className="ml-2"
-              >
-                <MaterialIcons name="gps-fixed" size={20} color="#065f46" />
-              </TouchableOpacity>
-            </View>
+        {/* Enhanced Header Section */}
+        <View
+          className="bg-emerald-800 px-6 pt-10 pb-14 rounded-b-[40px] shadow-lg"
+        >
+          <View className="flex-row items-center justify-between mb-4">
+            <Text className="text-white text-3xl font-bold">Greener Travel</Text>
+            <Ionicons name="earth" size={32} color="#fff" />
           </View>
-  
-          {/* To Section */}
-          <View className="relative">
-            <Text
-              className="absolute -top-3 left-4 bg-white px-1 text-gray-600 font-psemibold text-sm"
-              style={{ zIndex: 1 }}
-            >
-              To
+          
+          <Text className="text-green-100 text-lg mb-6">
+            Make a difference with every journey! 🌱
+          </Text>
+
+          {/* Enhanced Navigation Button */}
+          <TouchableOpacity 
+            className="bg-white px-6 py-4 rounded-2xl flex-row items-center justify-center shadow-xl"
+            onPress={() => router.push("/(tabs)/travel/go")}
+            style={{
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.1,
+              shadowRadius: 10,
+            }}
+          >
+            <Ionicons name="navigate-circle" size={28} color="#065f46" />
+            <Text className="text-green-800 text-lg font-bold ml-2">
+              Start Green Journey
             </Text>
-            <View className="flex-row items-center border border-gray-300 rounded-md px-3 py-1.5">
-              <MaterialIcons
-                name="location-on"
-                size={20}
-                color="#065f46"
-                className="mr-3"
-              />
-              <TextInput
-                placeholder="Destination"
-                value={toLocation}
-                onChangeText={(text) => handleInputChange(text, "to")}
-                className="flex-1 text-gray-800 text-sm font-pmedium"
-                style={{ height: 40 }}
-              />
-              {toLocation !== "" && (
-                <TouchableOpacity onPress={() => handleClearInput("to")}>
-                  <MaterialIcons name="close" size={20} color="#888" />
-                </TouchableOpacity>
-              )}
-              <TouchableOpacity
-                onPress={() => fetchCurrentLocation("to")}
-                className="ml-2"
-              >
-                <MaterialIcons name="gps-fixed" size={20} color="#065f46" />
-              </TouchableOpacity>
-            </View>
-          </View>
+          </TouchableOpacity>
         </View>
-  
-        {/* Suggestions List */}
-        {suggestions.length > 0 ? (
-          <FlatList
-            data={suggestions}
-            keyExtractor={(item) => item.place_id}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                onPress={() => handleSelectSuggestion(item)}
-                className="flex-row items-center bg-white shadow-sm rounded-lg px-4 mx-1 mb-2 h-16"
-              >
-                <MaterialIcons name="place" size={24} color="#065f46" />
-                <View className="ml-4 flex-1">
-                  <Text
-                    className="font-medium text-gray-900 text-base truncate"
-                    numberOfLines={1}
-                  >
-                    {item.description}
-                  </Text>
-                  <Text
-                    className="text-gray-500 text-sm truncate"
-                    numberOfLines={1}
-                  >
-                    {item.structured_formatting?.secondary_text}
+
+        {/* Enhanced Leaderboard */}
+        <View className="px-6 mt-8">
+          <View className="flex-row items-center justify-between mb-6">
+            <Text className="text-2xl font-bold text-gray-800">
+              Top Savers
+            </Text>
+            <View className="bg-green-100 px-4 py-2 rounded-full">
+              <Text className="text-green-800 font-semibold">
+                This Month
+              </Text>
+            </View>
+          </View>
+
+          {leaderboardData.map((user, index) => (
+            <TouchableOpacity
+              key={user.id}
+              className={`mb-3 p-4 rounded-2xl flex-row items-center justify-between ${
+                user.isUser 
+                  ? 'bg-green-100 border-2 border-green-500'
+                  : 'bg-white'
+              }`}
+              style={{
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.1,
+                shadowRadius: 4,
+              }}
+            >
+              <View className="flex-row items-center flex-1">
+                <View className={`w-8 h-8 rounded-full ${
+                  index < 3 ? 'bg-green-700' : 'bg-gray-200'
+                } items-center justify-center mr-3`}>
+                  <Text className="text-white font-bold">
+                    {renderMedal(index + 1) || index + 1}
                   </Text>
                 </View>
-              </TouchableOpacity>
-            )}
-            contentContainerStyle={{ paddingBottom: 64 }}
-          />
-        ) : (
-          <Text className="text-gray-500 text-center mt-4 font-psemibold">
-            No suggestions available. Try searching for another location.
-          </Text>
-        )}
-  
-        {/* Navigate Button */}
-        <TouchableOpacity
-          disabled={!startLatLng || !endLatLng}
-          className={`absolute bottom-[1rem] left-4 right-4 py-3 shadow-lg rounded-full ${
-            startLatLng && endLatLng ? "bg-emerald-800" : "bg-gray-400"
-          }`}
-          onPress={() => {
-            router.push({
-              pathname: "/(tabs)/travel/routescreen",
-              params: {
-                startLatLng: JSON.stringify(startLatLng),
-                endLatLng: JSON.stringify(endLatLng),
-              },
-            });
-          }}
-        >
-          <Text className="text-white text-center font-bold text-lg">
-            Find Routes
-          </Text>
-        </TouchableOpacity>
-      </SafeAreaView>
-    );
-  };
-  
-  export default Travel;
-  
+                <Text className={`text-lg ${
+                  user.isUser ? 'text-green-800 font-bold' : 'text-gray-700'
+                }`}>
+                  {user.name}
+                </Text>
+              </View>
+              <View className="flex-row items-center">
+                <Ionicons 
+                  name="leaf" 
+                  size={18} 
+                  color={user.isUser ? "#065f46" : "#6B7280"} 
+                />
+                <Text className={`ml-1 font-bold ${
+                  user.isUser ? 'text-green-800' : 'text-gray-600'
+                }`}>
+                  {user.saved} kg
+                </Text>
+              </View>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
