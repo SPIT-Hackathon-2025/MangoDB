@@ -49,8 +49,17 @@ const IssueScreen = () => {
           headers: { "Content-Type": "multipart/form-data" },
         }
       );
+      const ans = await axios.post(
+        "https://d7da-103-104-226-58.ngrok-free.app/llm/query",
+        {
+          query: description,
+        }
+      );
+      const formattedData = ans.data
+        .map((item) => `${item.departmentName}:\n${item.Contact}`)
+        .join("\n\n");
 
-      Alert.alert("Success", "Issue reported successfully");
+      Alert.alert("Success", formattedData);
       setModalVisible(false);
       fetchIssues();
     } catch (error) {
