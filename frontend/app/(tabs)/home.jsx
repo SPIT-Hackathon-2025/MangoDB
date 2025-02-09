@@ -81,6 +81,7 @@ const IssueScreen = () => {
 
       <ScrollView className="flex-1">
         {/* Report Card - Highlighted */}
+      
         <View className="p-6">
           <TouchableOpacity
             onPress={() => setModalVisible(true)}
