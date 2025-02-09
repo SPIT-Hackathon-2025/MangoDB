@@ -12,7 +12,7 @@ const MapScreen = () => {
     const fetchIssues = async () => {
       try {
         // Replace this with your actual API endpoint
-        const response = await axios.get('https://cdbf-103-104-226-58.ngrok-free.app/api/issues');
+        const response = await axios.get('https://666c-103-104-226-58.ngrok-free.app/api/issues');
         setIssues(response.data);
       } catch (error) {
         console.error('Error fetching issues:', error);

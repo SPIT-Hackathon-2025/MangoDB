@@ -40,14 +40,14 @@ const FoundScreen = () => {
     try {
       console.log("Sending formData:", formData);
       const response = await axios.post(
-        "https://3329-103-104-226-58.ngrok-free.app/api/item-found",
+        "https://666c-103-104-226-58.ngrok-free.app/api/item-found",
         formData,
         {
           headers: { "Content-Type": "multipart/form-data" },
         }
       );
       const res = await axios.post(
-        "https://3329-103-104-226-58.ngrok-free.app/api/append-csv",
+        "https://666c-103-104-226-58.ngrok-free.app/api/append-csv",
         {
           Contact: "9152743762",
           description: description,
@@ -71,7 +71,7 @@ const FoundScreen = () => {
   const fetchItems = async () => {
     try {
       const response = await axios.get(
-        "https://3329-103-104-226-58.ngrok-free.app/api/lost-items"
+        "https://666c-103-104-226-58.ngrok-free.app/api/lost-items"
       );
       setItems(response.data);
     } catch (error) {
@@ -117,7 +117,7 @@ const FoundScreen = () => {
               {item.imageUrl && (
                 <Image
                   source={{
-                    uri: `https://3329-103-104-226-58.ngrok-free.app/${item.imageUrl}`,
+                    uri: `https://666c-103-104-226-58.ngrok-free.app/${item.imageUrl}`,
                   }}
                   className="w-20 h-20 rounded-lg mr-4"
                 />
