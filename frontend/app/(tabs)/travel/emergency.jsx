@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { View, Text, TouchableOpacity, Vibration } from "react-native";
+import React, { useEffect, useState, useRef } from "react";
+import { View, Text, TouchableOpacity, Vibration, Alert } from "react-native";
 import {
   FlingGestureHandler,
   Directions,
@@ -7,33 +7,83 @@ import {
   GestureHandlerRootView,
 } from "react-native-gesture-handler";
 import * as Haptics from "expo-haptics";
+import io from "socket.io-client";
+import { router } from "expo-router";
 
-const Account = ({ navigation }) => {
-  const [countdown, setCountdown] = useState(5);
+const Account = () => {
+  const [countdown, setCountdown] = useState(3);
+  const [attempts, setAttempts] = useState(0);
+  const socketRef = useRef(null);
+  const countdownInterval = useRef(null);
+  const isConfirmed = useRef(false); // To prevent unnecessary SOS triggers
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      if (countdown > 0) {
-        setCountdown((prev) => prev - 1);
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-        Vibration.vibrate(800);
-      } else {
-        clearInterval(interval);
-        triggerEmergencyCall();
-      }
+    if (!socketRef.current) {
+      socketRef.current = io("http://10.10.121.39:5001", {
+        transports: ["websocket"],
+        reconnection: true,
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    if (attempts < 3 && !isConfirmed.current) {
+      startCountdown();
+    }
+    return () => clearInterval(countdownInterval.current);
+  }, [attempts]);
+
+  const startCountdown = () => {
+    clearInterval(countdownInterval.current);
+    setCountdown(3);
+
+    countdownInterval.current = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev > 1) {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+          Vibration.vibrate(800);
+          return prev - 1;
+        } else {
+          clearInterval(countdownInterval.current);
+          handleMissedResponse();
+          return 3;
+        }
+      });
     }, 1000);
-
-    return () => clearInterval(interval);
-  }, [countdown]);
-
-  const triggerEmergencyCall = () => {
-    alert("🚨 Calling emergency contacts...");
-    // Add emergency call logic here
   };
 
-  const cancelSOS = () => {
-    alert("✅ Emergency canceled");
-    navigation.goBack();
+  const handleMissedResponse = () => {
+    if (isConfirmed.current) return; // Stop if already confirmed
+    if (attempts < 2) {
+      setAttempts((prev) => prev + 1);
+    } else {
+      emitEmergencySignal();
+    }
+  };
+
+  const respondToCheck = () => {
+    isConfirmed.current = true;
+    clearInterval(countdownInterval.current);
+    setCountdown(3);
+    setAttempts(0);
+    Alert.alert("Response Received", "You confirmed your presence.");
+    goBack();
+  };
+
+  const emitEmergencySignal = () => {
+    if (!isConfirmed.current) {
+      socketRef.current.emit("sendForumMessage", {
+        username: "user",
+        message: "Alert: Emergency Signal Sent",
+        timestamp: new Date().toISOString(),
+      });
+      Alert.alert("Emergency Alert Sent", "Notified all users.");
+      goBack();
+    }
+  };
+
+  const goBack = () => {
+    router.push("/home");
   };
 
   return (
@@ -42,7 +92,7 @@ const Account = ({ navigation }) => {
         direction={Directions.LEFT}
         onHandlerStateChange={({ nativeEvent }) => {
           if (nativeEvent.state === State.END) {
-            cancelSOS();
+            respondToCheck();
           }
         }}
       >
@@ -56,13 +106,13 @@ const Account = ({ navigation }) => {
             }}
           >
             <Text style={{ color: "white", fontSize: 28, fontWeight: "bold" }}>
-              ⚠️ EMERGENCY SOS
+              ⚠️ ATTENTION REQUIRED
             </Text>
             <Text style={{ color: "white", fontSize: 18, marginTop: 10 }}>
-              Swipe left within {countdown} seconds to cancel
+              Swipe left or tap below within {countdown} seconds
             </Text>
             <TouchableOpacity
-              onPress={cancelSOS}
+              onPress={respondToCheck}
               style={{
                 marginTop: 20,
                 backgroundColor: "black",
@@ -70,7 +120,7 @@ const Account = ({ navigation }) => {
                 borderRadius: 10,
               }}
             >
-              <Text style={{ color: "white", fontSize: 16 }}>Cancel Now</Text>
+              <Text style={{ color: "white", fontSize: 16 }}>Confirm Presence</Text>
             </TouchableOpacity>
           </View>
         </View>
