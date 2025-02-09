@@ -1,45 +1,43 @@
-# NOTE REDUNDANT
-
-import torch
-from transformers import BlipProcessor, BlipForConditionalGeneration
-from PIL import Image
 from flask import Flask, request, jsonify
-import osx
+from sentence_transformers import SentenceTransformer
+import pandas as pd
+import faiss
+import numpy as np
 
 app = Flask(__name__)
 
-# Disable parallel processing to prevent semaphore leaks
+# Initialize components
+df = pd.read_csv("lostAndFoun.csv")
+encoder = SentenceTransformer("all-mpnet-base-v2")
 
+# Create search index
+vectors = encoder.encode(df.Description)
+index = faiss.IndexFlatL2(vectors.shape[1])
+index.add(vectors)
 
-# Load BLIP model once
-processor = BlipProcessor.from_pretrained("Salesforce/blip-image-captioning-base")
-model = BlipForConditionalGeneration.from_pretrained("Salesforce/blip-image-captioning-base")
-
-@app.route('/generate_caption', methods=['POST'])
-def generate_caption():
-    if 'image' not in request.files:
-        return jsonify({'error': 'No image file provided'}), 400
-
-    image_file = request.files['image']
-
-    if image_file.filename == '':
-        return jsonify({'error': 'Empty file name'}), 400
-
+@app.route('/query', methods=['POST'])
+def search():
     try:
-        # Load and process the image
-        image = Image.open(image_file).convert("RGB")
-        inputs = processor(image, return_tensors="pt")
-
-        # Generate description
-        with torch.no_grad():
-            output = model.generate(**inputs)
-
-        # Decode output
-        description = processor.decode(output[0], skip_special_tokens=True)
-        return jsonify({'description': description})
-
+        query = request.get_json().get('query')
+        if not query:
+            return jsonify({"error": "Query is required"}), 400
+            
+        # Search top 2 similar items
+        query_vector = encoder.encode(query).reshape(1, -1)
+        distances, indices = index.search(query_vector, k=2)
+        
+        # Prepare results
+        results = [
+            {
+                "match": df.loc[idx].to_dict()
+                # "distance": float(dist)
+            }
+            for dist, idx in sorted(zip(distances[0], indices[0]), key=lambda x: x[0])  # Sort by distance
+        ]
+        
+        return jsonify({"matches": results})
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5003)
+    app.run(port=5002)

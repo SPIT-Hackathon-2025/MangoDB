@@ -6,6 +6,20 @@ export default function TravelLayout() {
             <Stack.Screen 
                 name="index" 
                 options={{
+                    headerTitle: 'Explore',
+                    headerTitleAlign: 'center',
+                    headerStyle: {
+                        height: 80,
+                    },
+                    headerTitleStyle: {
+                        fontSize: 18,
+                        fontWeight: 'bold',
+                    },
+                }} 
+            />
+            <Stack.Screen 
+                name="go" 
+                options={{
                     headerTitle: 'Where To?',
                     headerTitleAlign: 'center',
                     headerStyle: {
