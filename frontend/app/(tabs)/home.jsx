@@ -1,49 +1,111 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, TextInput, Modal, Alert, Image, SafeAreaView, ScrollView } from 'react-native';
-import axios from 'axios';
-import CaptureImage from '../../components/ui/CaptureImage';
-import LocationPicker from '../../components/ui/LocationPicker';
-import Icon from 'react-native-vector-icons/FontAwesome';
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  TextInput,
+  Modal,
+  Alert,
+  Image,
+  SafeAreaView,
+  ScrollView,
+} from "react-native";
+import axios from "axios";
+import CaptureImage from "../../components/ui/CaptureImage";
+import LocationPicker from "../../components/ui/LocationPicker";
+import Icon from "react-native-vector-icons/FontAwesome";
 
 const IssueScreen = () => {
   const [imageUri, setImageUri] = useState(null);
   const [location, setLocation] = useState(null);
-  const [description, setDescription] = useState('');
+  const [description, setDescription] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
   const [issues, setIssues] = useState([]);
 
   const handleSubmit = async () => {
     if (!imageUri || !location || !description) {
-      Alert.alert('Error', 'Please provide all the details');
+      Alert.alert("Error", "Please provide all the details");
       return;
     }
 
     const formData = new FormData();
-    formData.append('image', {
+    formData.append("image", {
       uri: imageUri,
-      type: 'image/jpeg',
-      name: 'issue_image.jpg',
+      type: "image/jpeg",
+      name: "issue_image.jpg",
     });
-    formData.append('description', description);
-    formData.append('location', JSON.stringify(location));
+    formData.append("description", description);
+    formData.append("location", JSON.stringify(location));
+    formData.append(
+      "question",
+      "want you to do two things:firstly, generate a description of the problem in the image, explain everry detail related to the problem. by problem i mean one which needs complaining to respective authority that can solve it. Only print what problem is present in the image. Do not give a preamble or postamble to it. Do not include info about the respective authority as well if such problem is not present in the image, just output 'no'.make first secondlyi also want 5 worded sentencte describing the problem have one line space in between"
+    );
+
     try {
-      await axios.post('https://cdbf-103-104-226-58.ngrok-free.app/api/report-issue', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
-      Alert.alert('Success', 'Issue reported successfully');
+      await axios.post(
+        "https://d7da-103-104-226-58.ngrok-free.app/api/report-issue",
+        formData,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+        }
+      );
+      const ans = await axios.post(
+        "https://d7da-103-104-226-58.ngrok-free.app/llm/query",
+        {
+          query: description,
+        }
+      );
+      const formattedData = ans.data
+        .map((item) => `${item.departmentName}:\n${item.Contact}`)
+        .join("\n\n");
+
+      Alert.alert("Success", formattedData);
       setModalVisible(false);
       fetchIssues();
     } catch (error) {
-      Alert.alert('Error', 'There was an issue reporting the problem');
+      Alert.alert("Error", "There was an issue reporting the problem");
     }
   };
 
   const fetchIssues = async () => {
     try {
-      const response = await axios.get('https://cdbf-103-104-226-58.ngrok-free.app/api/issues');
+      const response = await axios.get(
+        "https://d7da-103-104-226-58.ngrok-free.app/api/issues"
+      );
       setIssues(response.data);
     } catch (error) {
-      console.error('Error fetching issues:', error);
+      console.error("Error fetching issues:", error);
+    }
+  };
+  const handleAI = async () => {
+    if (!imageUri) {
+      Alert.alert("Error", "Please capture an image first.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("image", {
+      uri: imageUri,
+      type: "image/jpeg",
+      name: "issue_image.jpg",
+    });
+    formData.append("question", "What?");
+
+    try {
+      const response = await axios.post(
+        "https://d7da-103-104-226-58.ngrok-free.app/gemini",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      console.log("AI Response:", response.data);
+      setDescription(response.data);
+    } catch (error) {
+      console.error("AI request failed:", error);
+      Alert.alert("Error", "Failed to get AI response.");
     }
   };
 
@@ -52,11 +114,11 @@ const IssueScreen = () => {
   }, []);
 
   const handleVote = (id, type) => {
-    const updatedIssues = issues.map(issue => {
+    const updatedIssues = issues.map((issue) => {
       if (issue._id === id) {
         issue.upvotes = issue.upvotes || 0;
         issue.downvotes = issue.downvotes || 0;
-        if (type === 'upvote') {
+        if (type === "upvote") {
           issue.hasVotedUp = !issue.hasVotedUp;
           issue.upvotes += issue.hasVotedUp ? 1 : -1;
         } else {
@@ -80,6 +142,7 @@ const IssueScreen = () => {
 
       <ScrollView className="flex-1">
         {/* Report Card - Highlighted */}
+      
         <View className="p-6">
           <TouchableOpacity
             onPress={() => setModalVisible(true)}
@@ -99,40 +162,57 @@ const IssueScreen = () => {
 
         {/* Issues List */}
         <View className="px-6">
-          <Text className="text-lg font-semibold text-gray-900 mb-4">Recent Reports</Text>
+          <Text className="text-lg font-semibold text-gray-900 mb-4">
+            Recent Reports
+          </Text>
           {issues.map((item) => (
-            <View key={item._id?.toString() || Math.random().toString()} 
-                  className="bg-white rounded-2xl p-4 mb-4 border-2 border-gray-200">
+            <View
+              key={item._id?.toString() || Math.random().toString()}
+              className="bg-white rounded-2xl p-4 mb-4 border-2 border-gray-200"
+            >
               <View className="flex-row">
                 {item.imageUrl && (
                   <Image
-                    source={{ uri: `https://cdbf-103-104-226-58.ngrok-free.app/${item.imageUrl}` }}
+                    source={{
+                      uri: `https://d7da-103-104-226-58.ngrok-free.app/${item.imageUrl}`,
+                    }}
                     className="w-20 h-20 rounded-lg mr-4"
                   />
                 )}
                 <View className="flex-1">
                   <Text className="text-xs text-gray-500 mb-1">
-                    {item.address}
+                    {item.location?.latitude.toFixed(4)},{" "}
+                    {item.location?.longitude.toFixed(4)}
                   </Text>
                   <Text className="text-gray-900 text-sm mb-2">
-                    {item.description || 'No description provided'}
+                    {item.description || "No description provided"}
                   </Text>
                   <View className="flex-row items-center space-x-4">
-                    <TouchableOpacity 
-                      onPress={() => handleVote(item._id, 'upvote')}
+                    <TouchableOpacity
+                      onPress={() => handleVote(item._id, "upvote")}
                       className="flex-row items-center"
                     >
-                      <Icon name="arrow-up" size={12} 
-                            color={item.hasVotedUp ? '#065f46' : '#6b7280'} />
-                      <Text className="ml-1 text-xs text-gray-500">{item.upvotes || 0}</Text>
+                      <Icon
+                        name="arrow-up"
+                        size={12}
+                        color={item.haxsVotedUp ? "#065f46" : "#6b7280"}
+                      />
+                      <Text className="ml-1 text-xs text-gray-500">
+                        {item.upvotes || 0}
+                      </Text>
                     </TouchableOpacity>
-                    <TouchableOpacity 
-                      onPress={() => handleVote(item._id, 'downvote')}
+                    <TouchableOpacity
+                      onPress={() => handleVote(item._id, "downvote")}
                       className="flex-row items-center"
                     >
-                      <Icon name="arrow-down" size={12} 
-                            color={item.hasVotedDown ? '#065f46' : '#6b7280'} />
-                      <Text className="ml-1 text-xs text-gray-500">{item.downvotes || 0}</Text>
+                      <Icon
+                        name="arrow-down"
+                        size={12}
+                        color={item.hasVotedDown ? "#065f46" : "#6b7280"}
+                      />
+                      <Text className="ml-1 text-xs text-gray-500">
+                        {item.downvotes || 0}
+                      </Text>
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -152,8 +232,10 @@ const IssueScreen = () => {
         <View className="flex-1 justify-center items-center bg-black bg-opacity-50">
           <View className="bg-white rounded-3xl w-11/12 max-h-[80%] m-6">
             <View className="px-6 pt-6 pb-4 border-b border-gray-200 flex-row justify-between items-center">
-              <Text className="text-xl font-semibold text-gray-900">New Report</Text>
-              <TouchableOpacity 
+              <Text className="text-xl font-semibold text-gray-900">
+                New Report
+              </Text>
+              <TouchableOpacity
                 onPress={() => setModalVisible(false)}
                 className="rounded-full p-2 bg-gray-100"
               >
@@ -163,21 +245,41 @@ const IssueScreen = () => {
 
             <ScrollView className="p-6">
               <View className="mb-6">
-                <Text className="text-sm font-medium text-gray-700 mb-2">Photo</Text>
+                <Text className="text-sm font-medium text-gray-700 mb-2">
+                  Photo
+                </Text>
                 <View className="bg-gray-50 rounded-xl border-2 border-gray-200 p-4">
                   <CaptureImage setImageUri={setImageUri} />
                 </View>
               </View>
 
               <View className="mb-6">
-                <Text className="text-sm font-medium text-gray-700 mb-2">Location</Text>
+                <Text className="text-sm font-medium text-gray-700 mb-2">
+                  Location
+                </Text>
                 <View className="bg-gray-50 rounded-xl border-2 border-gray-200 p-4">
                   <LocationPicker setLocation={setLocation} />
                 </View>
               </View>
 
               <View className="mb-6">
-                <Text className="text-sm font-medium text-gray-700 mb-2">Description</Text>
+                <View className="flex-row justify-between items-center mb-2">
+                  <Text className="text-sm font-medium text-gray-700">
+                    Description
+                  </Text>
+                  <TouchableOpacity
+                    className="flex-row items-center px-2 py-1 rounded-full bg-gray-50 border border-gray-200"
+                    onPress={handleAI}
+                  >
+                    <Icon
+                      name="magic"
+                      size={12}
+                      color="#6b7280"
+                      className="mr-1"
+                    />
+                    <Text className="text-xs text-gray-500 ml-1">Use AI</Text>
+                  </TouchableOpacity>
+                </View>
                 <TextInput
                   placeholder="Describe the issue..."
                   value={description}
@@ -193,7 +295,9 @@ const IssueScreen = () => {
                 onPress={handleSubmit}
                 className="bg-emerald-800 py-4 rounded-xl mb-4"
               >
-                <Text className="text-white text-center font-medium text-lg">Submit Report</Text>
+                <Text className="text-white text-center font-medium text-lg">
+                  Submit Report
+                </Text>
               </TouchableOpacity>
             </ScrollView>
           </View>

@@ -14,7 +14,7 @@ const findDep = async (req, res) => {
       }
     );
     const data = response.data.matches;
-    const updatedData = data.map(({ Contact, ...rest }) => rest);
+    const updatedData = data.map(({ text, ...rest }) => rest);
     // Send the response from Flask API to the client
     return res.status(200).json(updatedData);
   } catch (err) {
