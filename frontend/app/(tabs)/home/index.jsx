@@ -40,7 +40,7 @@ const IssueScreen = () => {
     formData.append("location", JSON.stringify(location));
     formData.append(
       "question",
-      "generate a short description of the problem in the image. by problem i mean one which needs complaining to respective authority that can solve it. Only print what problem is present in the image. Do not give a preamble or postamble to it. Do not include info about the respective authority as well if such problem is not present in the image, just output 'no.'"
+      "generate a short description of the problem in the image. by problem i mean one which needs complaining to respective authority that can solve it. Only print what problem is present in the image. Do not give any type pf JSON Data. Do not give a preamble or postamble to it. Do not include info about the respective authority as well if such problem is not present in the image, just output 'no.'"
     );
 
     try {
@@ -226,7 +226,7 @@ const IssueScreen = () => {
         transparent={true}
         onRequestClose={() => setModalVisible(false)}
       >
-        <View className="flex-1 justify-center items-center bg-black/50">
+        <View className="flex-1 justify-center items-center bg-black/70">
           <View className="bg-white rounded-3xl w-11/12 max-h-[80%] m-6">
             <View className="px-6 pt-6 pb-4 border-b border-gray-200 flex-row justify-between items-center">
               <Text className="text-xl font-semibold text-gray-900">New Report</Text>
@@ -241,16 +241,29 @@ const IssueScreen = () => {
             <ScrollView className="p-6">
               <View className="mb-6">
                 <Text className="text-sm font-medium text-gray-700 mb-2">Photo</Text>
-                <CaptureImage setImageUri={setImageUri} />
+                <View className="bg-gray-50 rounded-xl border-2 border-gray-200 p-4">
+                  <CaptureImage setImageUri={setImageUri} />
+                </View>
               </View>
 
               <View className="mb-6">
                 <Text className="text-sm font-medium text-gray-700 mb-2">Location</Text>
-                <LocationPicker setLocation={setLocation} />
+                <View className="bg-gray-50 rounded-xl border-2 border-gray-200 p-4">
+                  <LocationPicker setLocation={setLocation} />
+                </View>
               </View>
 
               <View className="mb-6">
-                <Text className="text-sm font-medium text-gray-700 mb-2">Description</Text>
+                <View className="flex-row justify-between items-center mb-2">
+                  <Text className="text-sm font-medium text-gray-700">Description</Text>
+                  <TouchableOpacity
+                    className="flex-row items-center px-2 py-1 rounded-full bg-gray-50 border border-gray-200"
+                    onPress={handleAI}
+                  >
+                    <Icon name="magic" size={12} color="#6b7280" className="mr-1" />
+                    <Text className="text-xs text-gray-500 ml-1">Use AI</Text>
+                  </TouchableOpacity>
+                </View>
                 <TextInput
                   placeholder="Describe the issue..."
                   value={description}
@@ -264,7 +277,7 @@ const IssueScreen = () => {
 
               <TouchableOpacity
                 onPress={handleSubmit}
-                className="w-full py-3 mt-6 rounded-xl bg-teal-600 flex items-center"
+                className="w-full py-3 mt-6 rounded-xl bg-emerald-800 flex items-center"
               >
                 <Text className="text-white text-lg">Submit Report</Text>
               </TouchableOpacity>
