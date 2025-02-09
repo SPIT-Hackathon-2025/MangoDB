@@ -25,28 +25,25 @@ const LostScreen = () => {
       Alert.alert("Error", "Please provide all the details");
       return;
     }
-  
+
     try {
       // Create request body as a plain object
       const requestBody = {
         description: description,
-        location: location  // This is already an object with latitude and longitude
+        location: location, // This is already an object with latitude and longitude
       };
-  
-      console.log("Sending data:", requestBody); // Debug log
-  
       const response = await axios.post(
-        "https://8e96-103-104-226-58.ngrok-free.app/api/item-lost",
+        "https://3329-103-104-226-58.ngrok-free.app/api/item-lost",
         requestBody,
         {
           headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
+            "Content-Type": "application/json",
+            Accept: "application/json",
           },
         }
       );
-  
-      console.log("Response:", response.data); // Debug log
+     
+      // console.log("Response:", response.data); // Debug log
       Alert.alert("Success", "Item reported successfully");
       setModalVisible(false);
       fetchItems();
@@ -58,7 +55,7 @@ const LostScreen = () => {
   const fetchItems = async () => {
     try {
       const response = await axios.get(
-        "https://8e96-103-104-226-58.ngrok-free.app/api/items"
+        "https://3329-103-104-226-58.ngrok-free.app/api/items"
       );
       setItems(response.data);
     } catch (error) {
@@ -81,7 +78,7 @@ const LostScreen = () => {
 
       <ScrollView className="flex-1">
         {/* Report Card - Highlighted */}
-      
+
         <View className="p-6">
           <TouchableOpacity
             onPress={() => setModalVisible(true)}
@@ -113,7 +110,7 @@ const LostScreen = () => {
                 {item.imageUrl && (
                   <Image
                     source={{
-                      uri: `https://8e96-103-104-226-58.ngrok-free.app/${item.imageUrl}`,
+                      uri: `https://3329-103-104-226-58.ngrok-free.app/${item.imageUrl}`,
                     }}
                     className="w-20 h-20 rounded-lg mr-4"
                   />
@@ -183,7 +180,6 @@ const LostScreen = () => {
             </View>
 
             <ScrollView className="p-6">
-
               <View className="mb-6">
                 <Text className="text-sm font-medium text-gray-700 mb-2">
                   Location

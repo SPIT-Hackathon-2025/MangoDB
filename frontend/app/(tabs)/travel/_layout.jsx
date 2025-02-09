@@ -10,10 +10,12 @@ export default function TravelLayout() {
                     headerTitleAlign: 'center',
                     headerStyle: {
                         height: 80,
+                        backgroundColor: '#03543F',
                     },
                     headerTitleStyle: {
                         fontSize: 18,
                         fontWeight: 'bold',
+                        color: 'white',
                     },
                 }} 
             />

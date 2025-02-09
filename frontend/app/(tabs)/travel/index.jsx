@@ -35,20 +35,20 @@ export default function GreenTravel() {
       >
         {/* Enhanced Header Section */}
         <View
-          className="bg-emerald-800 px-6 pt-10 pb-14 rounded-b-[40px] shadow-lg"
+          className="bg-background px-6 pt-10 pb-14 rounded-b-[40px] shadow-lg"
         >
           <View className="flex-row items-center justify-between mb-4">
-            <Text className="text-white text-3xl font-bold">Greener Travel</Text>
+            <Text className="text-emerald-800 text-3xl font-pbold">Greener Travel</Text>
             <Ionicons name="earth" size={32} color="#fff" />
           </View>
           
-          <Text className="text-green-100 text-lg mb-6">
+          <Text className="text-green-800 text-lg mb-6">
             Make a difference with every journey! 🌱
           </Text>
 
           {/* Enhanced Navigation Button */}
           <TouchableOpacity 
-            className="bg-white px-6 py-4 rounded-2xl flex-row items-center justify-center shadow-xl"
+            className="bg-emerald-800 px-6 py-4 rounded-2xl flex-row items-center justify-center shadow-xl"
             onPress={() => router.push("/(tabs)/travel/go")}
             style={{
               shadowColor: "#000",
@@ -57,8 +57,8 @@ export default function GreenTravel() {
               shadowRadius: 10,
             }}
           >
-            <Ionicons name="navigate-circle" size={28} color="#065f46" />
-            <Text className="text-green-800 text-lg font-bold ml-2">
+            <Ionicons name="navigate-circle" size={28} color="#ffffff" />
+            <Text className="text-white text-lg font-bold ml-2">
               Start Green Journey
             </Text>
           </TouchableOpacity>

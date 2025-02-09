@@ -151,14 +151,14 @@ export default function CommunityDiscussions() {
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
 
         {/* Header Section */}
-        <View className="bg-emerald-800 px-6 pt-10 pb-14 rounded-b-3xl shadow-md">
-          <Text className="text-white text-3xl font-bold mb-1">Community Hub</Text>
-          <Text className="text-green-100 text-lg">Join the conversation, make a difference</Text>
+        <View className="bg-background px-6 pt-10 pb-14 rounded-b-3xl shadow-md">
+          <Text className="text-emerald-800 text-3xl font-pbold mb-1">Welcome to the Community</Text>
+          <Text className="text-green-800 text-lg">Join the conversation, make a difference</Text>
         </View>
 
         {/* Discussions List */}
         <View className="px-6 mt-6">
-          <Text className="text-xl font-bold text-gray-800 mb-4">Recent Discussions</Text>
+          <Text className="text-xl font-bold text-gray-800 mb-4">Popular Discussions</Text>
           {discussions.map((discussion) => (
             <DiscussionCard key={discussion.id} discussion={discussion} toggleLike={toggleLike} />
           ))}

@@ -103,15 +103,15 @@ export default function CommunityPage() {
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
         
         {/* Header Section */}
-        <View className=" bg-emerald-800 px-6 pt-10 pb-14 rounded-b-3xl shadow-md">
+        <View className="bg-background px-6 pt-10 pb-10 rounded-b-3xl shadow-md">
           <View className="flex-row items-center">
             <View className={`${bgColor} p-3 rounded-full`}>
               <MaterialIcons name="forum" size={28} color={iconColor.replace("text-", "")} />
             </View>
-            <Text className="text-white text-3xl font-bold ml-4">{title}</Text>
+            <Text className="text-emerald-800 text-3xl font-pbold ml-4">{title}</Text>
           </View>
-          <Text className="text-green-100 text-lg mt-2">{description}</Text>
-          <Text className="text-green-200 mt-2">Started by {createdBy}</Text>
+          <Text className="text-green-800 text-lg font-pmedium mt-2">{description}</Text>
+          <Text className="text-green-700 mt-4">Started by {createdBy}</Text>
         </View>
 
         {/* Comments Section */}
