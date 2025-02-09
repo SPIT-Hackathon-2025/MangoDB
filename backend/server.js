@@ -7,9 +7,11 @@ const path = require("path");
 const fs = require("fs");
 const Issue = require("./models/Issue");
 const found = require("./models/found");
+const lost= require("./models/lost");
 const { createServer } = require("http");
 const { Server } = require("socket.io");
 const { reverseGeocode } = require("./services/location");
+
 
 dotenv.config();
 const app = express();
@@ -21,6 +23,9 @@ const io = new Server(server, {
   transports: ["websocket"],
   upgrade: false,
 });
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 const mongoUri = process.env.MONG_URI;
 if (!mongoUri) {
@@ -213,48 +218,61 @@ app.post("/api/item-found", upload.single("image"), async (req, res) => {
 // Route to handle item lost
 app.post("/api/item-lost", async (req, res) => {
   try {
-    console.log("Body:", req.body); // Log form fields (description, location)
-
-    // Ensure required data is received
-    if (!req.body.description || !req.body.location) {
+    // Debug logs
+    console.log("Headers:", req.headers);
+    console.log("Raw Body:", req.body);
+    
+    // Check if body is empty
+    if (!req.body || Object.keys(req.body).length === 0) {
       return res.status(400).json({
-        error:
-          "Please provide all required details (description, location)",
+        error: "Request body is empty"
       });
     }
 
-    // Process the received data
     const { description, location } = req.body;
 
-    // Parse location to get latitude and longitude
-    const parsedLocation = JSON.parse(location); // location should be a stringified object
-    console.log(location)
-    const { latitude, longitude } = parsedLocation;
-    
+    // Validate required fields
+    if (!description || !location) {
+      return res.status(400).json({
+        error: "Please provide all required details (description, location)"
+      });
+    }
+
+    // Ensure location has required properties
+    if (!location.latitude || !location.longitude) {
+      return res.status(400).json({
+        error: "Invalid location format"
+      });
+    }
 
     // Get the actual address from latitude and longitude using reverse geocoding
-    const address = await reverseGeocode(latitude, longitude);
+    const address = await reverseGeocode(location.latitude, location.longitude);
 
-    // If reverse geocoding fails
     if (!address) {
       return res.status(500).json({ error: "Could not retrieve address from coordinates" });
     }
 
-    // Create a new issue object with the address
+    // Create a new lost item
     const newLost = new lost({
       description,
-      location: parsedLocation, // Store latitude and longitude
-      address, // Store the human-readable address
+      location,
+      address
     });
 
-    // Save the issue to the database
-    await newLost.save();
+    // Save to database
+    const savedItem = await newLost.save();
+    console.log("Saved item:", savedItem); // Debug log
 
-    // Send a success response
-    res.status(200).json({ message: "Issue reported successfully" });
+    res.status(200).json({ 
+      message: "Lost item reported successfully",
+      item: savedItem 
+    });
   } catch (error) {
-    console.error("Error handling the report:", error.message);
-    res.status(500).json({ error: "There was an issue reporting the problem" });
+    console.error("Error handling lost item report:", error);
+    res.status(500).json({ 
+      error: "There was an error reporting the lost item",
+      details: error.message 
+    });
   }
 });
 
@@ -264,6 +282,16 @@ app.get("/api/issues", async (req, res) => {
     res.json(issues);
   } catch (error) {
     res.status(500).json({ message: "Error fetching issues", error });
+  }
+});
+
+app.get("/api/items", async (req, res) => {
+  try {
+    const items = await found.find();
+    console.log(items)
+    res.json(items);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching items", error });
   }
 });
 
