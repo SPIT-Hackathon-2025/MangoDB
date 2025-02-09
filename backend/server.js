@@ -7,7 +7,7 @@ const path = require("path");
 const Issue = require("./models/Issue");
 const { createServer } = require("http");
 const { Server } = require("socket.io");
-
+const { reverseGeocode } = require('./services/location');
 dotenv.config();
 const app = express();
 const server = createServer(app);
@@ -155,10 +155,25 @@ app.post("/api/report-issue", upload.single("image"), async (req, res) => {
     const { description, location } = req.body;
     const { path: imagePath } = req.file; // File path for the uploaded image
 
-    // Create a new issue object
+    // Parse location to get latitude and longitude
+    const parsedLocation = JSON.parse(location); // location should be a stringified object
+    console.log(location)
+    const { latitude, longitude } = parsedLocation;
+    
+
+    // Get the actual address from latitude and longitude using reverse geocoding
+    const address = await reverseGeocode(latitude, longitude);
+
+    // If reverse geocoding fails
+    if (!address) {
+      return res.status(500).json({ error: "Could not retrieve address from coordinates" });
+    }
+
+    // Create a new issue object with the address
     const newIssue = new Issue({
       description,
-      location: JSON.parse(location), // Parse location to convert it into a valid object
+      location: parsedLocation, // Store latitude and longitude
+      address, // Store the human-readable address
       imageUrl: imagePath, // You can store the image path or URL here
     });
 
@@ -172,6 +187,7 @@ app.post("/api/report-issue", upload.single("image"), async (req, res) => {
     res.status(500).json({ error: "There was an issue reporting the problem" });
   }
 });
+
 app.get("/api/issues", async (req, res) => {
   try {
     const issues = await Issue.find();
