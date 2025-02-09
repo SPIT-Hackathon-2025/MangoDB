@@ -27,7 +27,7 @@ const IssueScreen = () => {
       Alert.alert("Error", "Please provide all the details");
       return;
     }
-
+    
     const formData = new FormData();
     formData.append("image", {
       uri: imageUri,
@@ -43,14 +43,14 @@ const IssueScreen = () => {
 
     try {
       await axios.post(
-        "https://d7da-103-104-226-58.ngrok-free.app/api/report-issue",
+        "https://cdbf-103-104-226-58.ngrok-free.app/api/report-issue",
         formData,
         {
           headers: { "Content-Type": "multipart/form-data" },
         }
       );
       const ans = await axios.post(
-        "https://d7da-103-104-226-58.ngrok-free.app/llm/query",
+        "https://cdbf-103-104-226-58.ngrok-free.app/llm/query",
         {
           query: description,
         }
@@ -70,7 +70,7 @@ const IssueScreen = () => {
   const fetchIssues = async () => {
     try {
       const response = await axios.get(
-        "https://d7da-103-104-226-58.ngrok-free.app/api/issues"
+        "https://cdbf-103-104-226-58.ngrok-free.app/api/issues"
       );
       setIssues(response.data);
     } catch (error) {
@@ -93,7 +93,7 @@ const IssueScreen = () => {
 
     try {
       const response = await axios.post(
-        "https://d7da-103-104-226-58.ngrok-free.app/gemini",
+        "https://cdbf-103-104-226-58.ngrok-free.app/gemini",
         formData,
         {
           headers: {
@@ -181,8 +181,7 @@ const IssueScreen = () => {
                 )}
                 <View className="flex-1">
                   <Text className="text-xs text-gray-500 mb-1">
-                    {item.location?.latitude.toFixed(4)},{" "}
-                    {item.location?.longitude.toFixed(4)}
+                    {item.address}
                   </Text>
                   <Text className="text-gray-900 text-sm mb-2">
                     {item.description || "No description provided"}
