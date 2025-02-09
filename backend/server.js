@@ -7,11 +7,11 @@ const path = require("path");
 const fs = require("fs");
 const Issue = require("./models/Issue");
 const found = require("./models/found");
-const lost= require("./models/lost");
+const lost = require("./models/lost");
 const { createServer } = require("http");
 const { Server } = require("socket.io");
 const { reverseGeocode } = require("./services/location");
-
+const axios = require("axios");
 
 dotenv.config();
 const app = express();
@@ -222,11 +222,11 @@ app.post("/api/item-lost", async (req, res) => {
     // Debug logs
     console.log("Headers:", req.headers);
     console.log("Raw Body:", req.body);
-    
+
     // Check if body is empty
     if (!req.body || Object.keys(req.body).length === 0) {
       return res.status(400).json({
-        error: "Request body is empty"
+        error: "Request body is empty",
       });
     }
 
@@ -235,14 +235,14 @@ app.post("/api/item-lost", async (req, res) => {
     // Validate required fields
     if (!description || !location) {
       return res.status(400).json({
-        error: "Please provide all required details (description, location)"
+        error: "Please provide all required details (description, location)",
       });
     }
 
     // Ensure location has required properties
     if (!location.latitude || !location.longitude) {
       return res.status(400).json({
-        error: "Invalid location format"
+        error: "Invalid location format",
       });
     }
 
@@ -250,29 +250,31 @@ app.post("/api/item-lost", async (req, res) => {
     const address = await reverseGeocode(location.latitude, location.longitude);
 
     if (!address) {
-      return res.status(500).json({ error: "Could not retrieve address from coordinates" });
+      return res
+        .status(500)
+        .json({ error: "Could not retrieve address from coordinates" });
     }
 
     // Create a new lost item
     const newLost = new lost({
       description,
       location,
-      address
+      address,
     });
 
     // Save to database
     const savedItem = await newLost.save();
     console.log("Saved item:", savedItem); // Debug log
 
-    res.status(200).json({ 
+    res.status(200).json({
       message: "Lost item reported successfully",
-      item: savedItem 
+      item: savedItem,
     });
   } catch (error) {
     console.error("Error handling lost item report:", error);
-    res.status(500).json({ 
+    res.status(500).json({
       error: "There was an error reporting the lost item",
-      details: error.message 
+      details: error.message,
     });
   }
 });
@@ -289,7 +291,7 @@ app.get("/api/issues", async (req, res) => {
 app.get("/api/items", async (req, res) => {
   try {
     const items = await found.find();
-    console.log(items)
+    console.log(items);
     res.json(items);
   } catch (error) {
     res.status(500).json({ message: "Error fetching items", error });
@@ -326,10 +328,12 @@ app.post("/api/append-csv", (req, res) => {
     res.json({ message: "Data appended successfully!" });
   });
 });
-app.get("/api/found/query", async (req, res) => {
+app.post("/api/found/query", async (req, res) => {
   const { description } = req.body;
-  console.log(description);
-  return res.json({ message: description });
+  const info = await axios.post("http://localhost:5002/query", {
+    query: description,
+  });
+  return res.json(info.data.matches);
 });
 
 const start = async () => {
