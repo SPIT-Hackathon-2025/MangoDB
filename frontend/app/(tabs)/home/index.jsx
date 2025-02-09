@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -15,6 +15,17 @@ import CaptureImage from "../../../components/ui/CaptureImage";
 import LocationPicker from "../../../components/ui/LocationPicker";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { useRouter } from "expo-router";
+import io from "socket.io-client";
+import * as Notifications from "expo-notifications";
+import * as Device from "expo-device";
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: true,
+  }),
+});
 
 const IssueScreen = () => {
   const [imageUri, setImageUri] = useState(null);
@@ -23,6 +34,114 @@ const IssueScreen = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [issues, setIssues] = useState([]);
   const router = useRouter();
+    const [isConnected, setIsConnected] = useState(false);
+    const [userCount, setUserCount] = useState(0);
+    const [expoPushToken, setExpoPushToken] = useState("");
+    const socketRef = useRef(null);
+    const notificationListener = useRef();
+    const responseListener = useRef();
+  
+
+    useEffect(() => {
+      if (!socketRef.current) {
+        socketRef.current = io("http://10.10.121.39:5001", {
+          transports: ['websocket'],
+          reconnection: true,
+        });
+      }
+  
+      const socket = socketRef.current;
+  
+      socket.on('connect', () => {
+        setIsConnected(true);
+        console.log("Socket connected");
+      });
+      
+      socket.on('disconnect', () => {
+        setIsConnected(false);
+        console.log("Socket disconnected");
+      });
+      
+      socket.on("receiveForumMessage", async (newMessage) => {
+        console.log("New message received:", newMessage);
+        await scheduleNotification(newMessage);
+        setForumMessages(prev => [...prev, newMessage]);
+      });
+      
+      socket.on("userCount", count => {
+        console.log("User count updated:", count);
+        setUserCount(count);
+      });
+      
+      socket.on("receiveNotification", ({ title, message }) => {
+        console.log("Notification received from socket:", { title, message });
+        Alert.alert(title, message);
+      });
+  
+      return () => {
+        socket.off("receiveForumMessage");
+        socket.off("receiveNotification");
+        socket.off("connect");
+        socket.off("disconnect");
+        socket.off("userCount");
+      };
+    }, []);
+
+  // Function to register for push notifications
+    async function registerForPushNotificationsAsync() {
+      let token;
+  
+      if (Platform.OS === 'android') {
+        await Notifications.setNotificationChannelAsync('default', {
+          name: 'default',
+          importance: Notifications.AndroidImportance.MAX,
+          vibrationPattern: [0, 250, 250, 250],
+          lightColor: '#FF231F7C',
+        });
+      }
+  
+      if (Device.isDevice) {
+        const { status: existingStatus } = await Notifications.getPermissionsAsync();
+        let finalStatus = existingStatus;
+        
+        if (existingStatus !== 'granted') {
+          const { status } = await Notifications.requestPermissionsAsync();
+          finalStatus = status;
+        }
+        
+        if (finalStatus !== 'granted') {
+          Alert.alert('Failed', 'Failed to get push token for push notification!');
+          return;
+        }
+        
+        token = (await Notifications.getExpoPushTokenAsync()).data;
+      } else {
+        Alert.alert('Must use physical device', 'Push notifications require a physical device');
+      }
+  
+      return token;
+    }
+  
+    // Schedule a notification
+    const scheduleNotification = async (messageData) => {
+      try {
+        await Notifications.scheduleNotificationAsync({
+          content: {
+            title: `New message from ${messageData.username}`,
+            body: messageData.message,
+            data: { messageData },
+            sound: true,
+            priority: Notifications.AndroidNotificationPriority.HIGH,
+          },
+          trigger: { seconds: 1 },
+        });
+        console.log("Notification scheduled successfully");
+      } catch (error) {
+        console.error("Error scheduling notification:", error);
+        Alert.alert("Notification Error", "Failed to schedule notification");
+      }
+    };
+  
 
   const handleSubmit = async () => {
     if (!imageUri || !location || !description) {
@@ -40,7 +159,7 @@ const IssueScreen = () => {
     formData.append("location", JSON.stringify(location));
     formData.append(
       "question",
-      "generate a short description of the problem in the image. by problem i mean one which needs complaining to respective authority that can solve it. Only print what problem is present in the image. Do not give a preamble or postamble to it. Do not include info about the respective authority as well if such problem is not present in the image, just output 'no.'"
+      "generate a short description of the problem in the image. by problem i mean one which needs complaining to respective authority that can solve it. Only print what problem is present in the image. Do not give any type pf JSON Data. Do not give a preamble or postamble to it. Do not include info about the respective authority as well if such problem is not present in the image, just output 'no.'"
     );
 
     try {
@@ -62,6 +181,9 @@ const IssueScreen = () => {
         .join("\n\n");
 
       Alert.alert("Success", formattedData);
+      // socketRef.current.emit("sendForumMessage", {'username':'user',
+      //   'message':'New Report',
+      //   'timestamp': new Date().toISOString()})
       setModalVisible(false);
       fetchIssues();
     } catch (error) {
@@ -159,6 +281,17 @@ const IssueScreen = () => {
 
         {/* Issues List */}
         <View className="px-6">
+        <View className="flex-row justify-between items-center mb-4">
+            <Text className="text-lg font-semibold text-gray-900">Alarm</Text>
+            <TouchableOpacity
+              onPress={()=>{socketRef.current.emit("sendForumMessage", {'username':'user',
+                'message':'Alert',
+                'timestamp': new Date().toISOString()})}}
+              className="bg-emerald-800 px-4 py-2 rounded-xl"
+            >
+              <Text className="text-white text-sm">Alarm Button</Text>
+            </TouchableOpacity>
+          </View>
           <View className="flex-row justify-between items-center mb-4">
             <Text className="text-lg font-semibold text-gray-900">Recent Reports</Text>
             <TouchableOpacity
@@ -226,7 +359,7 @@ const IssueScreen = () => {
         transparent={true}
         onRequestClose={() => setModalVisible(false)}
       >
-        <View className="flex-1 justify-center items-center bg-black/50">
+        <View className="flex-1 justify-center items-center bg-black/70">
           <View className="bg-white rounded-3xl w-11/12 max-h-[80%] m-6">
             <View className="px-6 pt-6 pb-4 border-b border-gray-200 flex-row justify-between items-center">
               <Text className="text-xl font-semibold text-gray-900">New Report</Text>
@@ -241,16 +374,29 @@ const IssueScreen = () => {
             <ScrollView className="p-6">
               <View className="mb-6">
                 <Text className="text-sm font-medium text-gray-700 mb-2">Photo</Text>
-                <CaptureImage setImageUri={setImageUri} />
+                <View className="bg-gray-50 rounded-xl border-2 border-gray-200 p-4">
+                  <CaptureImage setImageUri={setImageUri} />
+                </View>
               </View>
 
               <View className="mb-6">
                 <Text className="text-sm font-medium text-gray-700 mb-2">Location</Text>
-                <LocationPicker setLocation={setLocation} />
+                <View className="bg-gray-50 rounded-xl border-2 border-gray-200 p-4">
+                  <LocationPicker setLocation={setLocation} />
+                </View>
               </View>
 
               <View className="mb-6">
-                <Text className="text-sm font-medium text-gray-700 mb-2">Description</Text>
+                <View className="flex-row justify-between items-center mb-2">
+                  <Text className="text-sm font-medium text-gray-700">Description</Text>
+                  <TouchableOpacity
+                    className="flex-row items-center px-2 py-1 rounded-full bg-gray-50 border border-gray-200"
+                    onPress={handleAI}
+                  >
+                    <Icon name="magic" size={12} color="#6b7280" className="mr-1" />
+                    <Text className="text-xs text-gray-500 ml-1">Use AI</Text>
+                  </TouchableOpacity>
+                </View>
                 <TextInput
                   placeholder="Describe the issue..."
                   value={description}
@@ -264,7 +410,7 @@ const IssueScreen = () => {
 
               <TouchableOpacity
                 onPress={handleSubmit}
-                className="w-full py-3 mt-6 rounded-xl bg-teal-600 flex items-center"
+                className="w-full py-3 mt-6 rounded-xl bg-emerald-800 flex items-center"
               >
                 <Text className="text-white text-lg">Submit Report</Text>
               </TouchableOpacity>
