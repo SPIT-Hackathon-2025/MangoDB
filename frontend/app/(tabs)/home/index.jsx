@@ -281,7 +281,7 @@ const IssueScreen = () => {
 
         {/* Issues List */}
         <View className="px-6">
-        <View className="flex-row justify-between items-center mb-4">
+        {/* <View className="flex-row justify-between items-center mb-4">
             <Text className="text-lg font-semibold text-gray-900">Alarm</Text>
             <TouchableOpacity
               onPress={()=>{socketRef.current.emit("sendForumMessage", {'username':'user',
@@ -291,7 +291,7 @@ const IssueScreen = () => {
             >
               <Text className="text-white text-sm">Alarm Button</Text>
             </TouchableOpacity>
-          </View>
+          </View> */}
           <View className="flex-row justify-between items-center mb-4">
             <Text className="text-lg font-semibold text-gray-900">Recent Reports</Text>
             <TouchableOpacity
