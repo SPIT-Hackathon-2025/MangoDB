@@ -2,19 +2,20 @@ import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
-  TouchableOpacity,
-  TextInput,
   Modal,
   Alert,
   Image,
   SafeAreaView,
   ScrollView,
+  TextInput,
+  TouchableOpacity,
 } from "react-native";
 import axios from "axios";
 import CaptureImage from "../../../components/ui/CaptureImage";
 import LocationPicker from "../../../components/ui/LocationPicker";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { useRouter } from "expo-router";
+
 const IssueScreen = () => {
   const [imageUri, setImageUri] = useState(null);
   const [location, setLocation] = useState(null);
@@ -22,6 +23,7 @@ const IssueScreen = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [issues, setIssues] = useState([]);
   const router = useRouter();
+
   const handleSubmit = async () => {
     if (!imageUri || !location || !description) {
       Alert.alert("Error", "Please provide all the details");
@@ -38,7 +40,7 @@ const IssueScreen = () => {
     formData.append("location", JSON.stringify(location));
     formData.append(
       "question",
-      "generate a short description of the problem in the image. by problem i mean one which needs complaining to respective authority that can solve it. Only print what problem is present in the image. Do not give a preamble or postamble to it. Do not include info about the respective authority as well if such problem is not present in the image, just output 'no'."
+      "generate a short description of the problem in the image. by problem i mean one which needs complaining to respective authority that can solve it. Only print what problem is present in the image. Do not give a preamble or postamble to it. Do not include info about the respective authority as well if such problem is not present in the image, just output 'no.'"
     );
 
     try {
@@ -77,6 +79,7 @@ const IssueScreen = () => {
       console.error("Error fetching issues:", error);
     }
   };
+
   const handleAI = async () => {
     if (!imageUri) {
       Alert.alert("Error", "Please capture an image first.");
@@ -131,18 +134,12 @@ const IssueScreen = () => {
     setIssues(updatedIssues);
   };
 
-  // ... keeping all the handler functions same ...
-
   return (
     <SafeAreaView className="flex-1 bg-white">
       {/* Header */}
-      <View className="pt-12 pb-4 px-6 border-b border-gray-200">
-        <Text className="text-2xl font-semibold text-gray-900">Issues</Text>
-      </View>
 
       <ScrollView className="flex-1">
         {/* Report Card - Highlighted */}
-      
         <View className="p-6">
           <TouchableOpacity
             onPress={() => setModalVisible(true)}
@@ -162,9 +159,16 @@ const IssueScreen = () => {
 
         {/* Issues List */}
         <View className="px-6">
-          <Text className="text-lg font-semibold text-gray-900 mb-4">
-            Recent Reports
-          </Text>
+          <View className="flex-row justify-between items-center mb-4">
+            <Text className="text-lg font-semibold text-gray-900">Recent Reports</Text>
+            <TouchableOpacity
+              onPress={() => router.push("/(tabs)/home/mapview")}
+              className="bg-emerald-800 px-4 py-2 rounded-xl"
+            >
+              <Text className="text-white text-sm">Go to Map View</Text>
+            </TouchableOpacity>
+          </View>
+
           {issues.map((item) => (
             <View
               key={item._id?.toString() || Math.random().toString()}
@@ -180,9 +184,7 @@ const IssueScreen = () => {
                   />
                 )}
                 <View className="flex-1">
-                  <Text className="text-xs text-gray-500 mb-1">
-                    {item.address}
-                  </Text>
+                  <Text className="text-xs text-gray-500 mb-1">{item.address}</Text>
                   <Text className="text-gray-900 text-sm mb-2">
                     {item.description || "No description provided"}
                   </Text>
@@ -194,11 +196,9 @@ const IssueScreen = () => {
                       <Icon
                         name="arrow-up"
                         size={12}
-                        color={item.haxsVotedUp ? "#065f46" : "#6b7280"}
+                        color={item.hasVotedUp ? "#065f46" : "#6b7280"}
                       />
-                      <Text className="ml-1 text-xs text-gray-500">
-                        {item.upvotes || 0}
-                      </Text>
+                      <Text className="ml-1 text-xs text-gray-500">{item.upvotes || 0}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                       onPress={() => handleVote(item._id, "downvote")}
@@ -209,23 +209,13 @@ const IssueScreen = () => {
                         size={12}
                         color={item.hasVotedDown ? "#065f46" : "#6b7280"}
                       />
-                      <Text className="ml-1 text-xs text-gray-500">
-                        {item.downvotes || 0}
-                      </Text>
+                      <Text className="ml-1 text-xs text-gray-500">{item.downvotes || 0}</Text>
                     </TouchableOpacity>
                   </View>
                 </View>
               </View>
             </View>
           ))}
-        </View>
-        <View className="px-6 py-4">
-          <TouchableOpacity
-            onPress={() => router.push("/(tabs)/home/mapview")}
-            className="bg-blue-500 p-4 rounded-xl items-center"
-          >
-            <Text className="text-white text-lg">Go to Map View</Text>
-          </TouchableOpacity>
         </View>
       </ScrollView>
 
@@ -236,12 +226,10 @@ const IssueScreen = () => {
         transparent={true}
         onRequestClose={() => setModalVisible(false)}
       >
-        <View className="flex-1 justify-center items-center bg-black/70">
+        <View className="flex-1 justify-center items-center bg-black/50">
           <View className="bg-white rounded-3xl w-11/12 max-h-[80%] m-6">
             <View className="px-6 pt-6 pb-4 border-b border-gray-200 flex-row justify-between items-center">
-              <Text className="text-xl font-semibold text-gray-900">
-                New Report
-              </Text>
+              <Text className="text-xl font-semibold text-gray-900">New Report</Text>
               <TouchableOpacity
                 onPress={() => setModalVisible(false)}
                 className="rounded-full p-2 bg-gray-100"
@@ -252,59 +240,33 @@ const IssueScreen = () => {
 
             <ScrollView className="p-6">
               <View className="mb-6">
-                <Text className="text-sm font-medium text-gray-700 mb-2">
-                  Photo
-                </Text>
-                <View className="bg-gray-50 rounded-xl border-2 border-gray-200 p-4">
-                  <CaptureImage setImageUri={setImageUri} />
-                </View>
+                <Text className="text-sm font-medium text-gray-700 mb-2">Photo</Text>
+                <CaptureImage setImageUri={setImageUri} />
               </View>
 
               <View className="mb-6">
-                <Text className="text-sm font-medium text-gray-700 mb-2">
-                  Location
-                </Text>
-                <View className="bg-gray-50 rounded-xl border-2 border-gray-200 p-4">
-                  <LocationPicker setLocation={setLocation} />
-                </View>
+                <Text className="text-sm font-medium text-gray-700 mb-2">Location</Text>
+                <LocationPicker setLocation={setLocation} />
               </View>
 
               <View className="mb-6">
-                <View className="flex-row justify-between items-center mb-2">
-                  <Text className="text-sm font-medium text-gray-700">
-                    Description
-                  </Text>
-                  <TouchableOpacity
-                    className="flex-row items-center px-2 py-1 rounded-full bg-gray-50 border border-gray-200"
-                    onPress={handleAI}
-                  >
-                    <Icon
-                      name="magic"
-                      size={12}
-                      color="#6b7280"
-                      className="mr-1"
-                    />
-                    <Text className="text-xs text-gray-500 ml-1">Use AI</Text>
-                  </TouchableOpacity>
-                </View>
+                <Text className="text-sm font-medium text-gray-700 mb-2">Description</Text>
                 <TextInput
                   placeholder="Describe the issue..."
                   value={description}
                   onChangeText={setDescription}
-                  className="bg-gray-50 rounded-xl border-2 border-gray-200 p-4 text-gray-900"
                   multiline
-                  numberOfLines={4}
+                  className="text-gray-900 p-3 bg-gray-100 rounded-xl"
+                  maxLength={200}
                   textAlignVertical="top"
                 />
               </View>
 
               <TouchableOpacity
                 onPress={handleSubmit}
-                className="bg-emerald-800 py-4 rounded-xl mb-4"
+                className="w-full py-3 mt-6 rounded-xl bg-teal-600 flex items-center"
               >
-                <Text className="text-white text-center font-medium text-lg">
-                  Submit Report
-                </Text>
+                <Text className="text-white text-lg">Submit Report</Text>
               </TouchableOpacity>
             </ScrollView>
           </View>
@@ -315,4 +277,3 @@ const IssueScreen = () => {
 };
 
 export default IssueScreen;
-
