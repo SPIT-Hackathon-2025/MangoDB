@@ -38,7 +38,7 @@ const IssueScreen = () => {
     formData.append("location", JSON.stringify(location));
     formData.append(
       "question",
-      "want you to do two things:firstly, generate a description of the problem in the image, explain everry detail related to the problem. by problem i mean one which needs complaining to respective authority that can solve it. Only print what problem is present in the image. Do not give a preamble or postamble to it. Do not include info about the respective authority as well if such problem is not present in the image, just output 'no'.make first secondlyi also want 5 worded sentencte describing the problem have one line space in between"
+      "generate a short description of the problem in the image. by problem i mean one which needs complaining to respective authority that can solve it. Only print what problem is present in the image. Do not give a preamble or postamble to it. Do not include info about the respective authority as well if such problem is not present in the image, just output 'no'."
     );
 
     try {
