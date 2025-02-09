@@ -95,12 +95,12 @@ export default function Layout() {
 
         {/* Account Tab */}
         <Tabs.Screen
-          name="account"
+          name="travel"
           options={{
             tabBarIcon: ({ color, size }) => (
-              <Ionicons name="person" color={color} size={24} />
+              <Ionicons name="airplane" color={color} size={24} />
             ),
-            tabBarLabel: "Account",
+            tabBarLabel: "Travel",
           }}
         />
 
