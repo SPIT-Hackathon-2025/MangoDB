@@ -1,10 +1,46 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, ScrollView, SafeAreaView, Image } from 'react-native';
+import React, {useState} from 'react';
+import { View, Text, TouchableOpacity, TextInput, Modal, Alert, Image, SafeAreaView, ScrollView } from 'react-native';
 import { MaterialIcons } from "@expo/vector-icons";
 import LottieView from 'lottie-react-native';
 import { router } from 'expo-router';
+import Icon from 'react-native-vector-icons/FontAwesome';
+import LocationPicker from '../../../components/ui/LocationPicker';
+import CaptureImage from '../../../components/ui/CaptureImage';
+import axios from 'axios';
 
 export default function LostAndFound() {
+  const [imageUri, setImageUri] = useState(null);
+  const [location, setLocation] = useState(null);
+  const [description, setDescription] = useState('');
+  const [modalVisible, setModalVisible] = useState(false);
+  const handleSubmit = async () => {
+    if (!imageUri || !location || !description) {
+      Alert.alert('Error', 'Please provide all the details');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('image', {
+      uri: imageUri,
+      type: 'image/jpeg',
+      name: 'issue_image.jpg',
+    });
+    formData.append('description', description);
+    formData.append('location', JSON.stringify(location));
+    console.log('first request');
+    try {
+      console.log('formData', formData);
+      await axios.post('https://8e96-103-104-226-58.ngrok-free.app/api/item-found', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      console.log('Item reported successfully');
+      Alert.alert('Success', 'Item reported successfully');
+      setModalVisible(false);
+    } catch (error) {
+      Alert.alert('Error', 'There was an issue reporting the item');
+    }
+  };
+  
   return (
     <SafeAreaView className="flex-1 bg-white">
       <ScrollView 
@@ -46,11 +82,7 @@ export default function LostAndFound() {
 
           <TouchableOpacity 
             className="bg-white rounded-2xl p-5 flex-row items-center border-2 border-emerald-800 shadow-sm active:scale-95"
-            onPress={() => {
-              router.push({
-                pathname: "/(tabs)/lostandfound/found",
-              });
-            }}
+            onPress={() => setModalVisible(true)}
           >
             <View className="bg-emerald-800 rounded-full p-3">
               <MaterialIcons name="back-hand" size={28} color="white" />
@@ -115,6 +147,62 @@ export default function LostAndFound() {
         </View>
 
       </ScrollView>
+      <Modal
+        visible={modalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View className="flex-1 justify-center items-center bg-black bg-opacity-50">
+          <View className="bg-white rounded-3xl w-11/12 max-h-[80%] m-6">
+            <View className="px-6 pt-6 pb-4 border-b border-gray-200 flex-row justify-between items-center">
+              <Text className="text-xl font-semibold text-gray-900">New Report</Text>
+              <TouchableOpacity 
+                onPress={() => setModalVisible(false)}
+                className="rounded-full p-2 bg-gray-100"
+              >
+                <Icon name="times" size={20} color="#374151" />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView className="p-6">
+              <View className="mb-6">
+                <Text className="text-sm font-medium text-gray-700 mb-2">Photo</Text>
+                <View className="bg-gray-50 rounded-xl border-2 border-gray-200 p-4">
+                  <CaptureImage setImageUri={setImageUri} />
+                </View>
+              </View>
+
+              <View className="mb-6">
+                <Text className="text-sm font-medium text-gray-700 mb-2">Location</Text>
+                <View className="bg-gray-50 rounded-xl border-2 border-gray-200 p-4">
+                  <LocationPicker setLocation={setLocation} />
+                </View>
+              </View>
+
+              <View className="mb-6">
+                <Text className="text-sm font-medium text-gray-700 mb-2">Description</Text>
+                <TextInput
+                  placeholder="Describe the issue..."
+                  value={description}
+                  onChangeText={setDescription}
+                  className="bg-gray-50 rounded-xl border-2 border-gray-200 p-4 text-gray-900"
+                  multiline
+                  numberOfLines={4}
+                  textAlignVertical="top"
+                />
+              </View>
+
+              <TouchableOpacity
+                onPress={handleSubmit}
+                className="bg-emerald-800 py-4 rounded-xl mb-4"
+              >
+                <Text className="text-white text-center font-medium text-lg">Submit Report</Text>
+              </TouchableOpacity>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
