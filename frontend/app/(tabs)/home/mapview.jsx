@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, ActivityIndicator, SafeAreaView } from 'react-native';
-import MapView, { Marker } from 'react-native-maps';
-import axios from 'axios'; // Assuming you use axios for making requests
+import React, { useState, useEffect } from "react";
+import { View, Text, ActivityIndicator, SafeAreaView } from "react-native";
+import MapView, { Marker } from "react-native-maps";
+import axios from "axios"; // Assuming you use axios for making requests
 import { useRouter } from "expo-router";
 
 const MapScreen = () => {
@@ -12,10 +12,12 @@ const MapScreen = () => {
     const fetchIssues = async () => {
       try {
         // Replace this with your actual API endpoint
-        const response = await axios.get('https://cdbf-103-104-226-58.ngrok-free.app/api/issues');
+        const response = await axios.get(
+          "https://3329-103-104-226-58.ngrok-free.app.app/api/issues"
+        );
         setIssues(response.data);
       } catch (error) {
-        console.error('Error fetching issues:', error);
+        console.error("Error fetching issues:", error);
       } finally {
         setLoading(false);
       }
@@ -37,22 +39,20 @@ const MapScreen = () => {
       {loading ? (
         <ActivityIndicator size="large" color="#0000ff" />
       ) : (
-        <MapView
-          style={{ flex: 1 }}
-          initialRegion={defaultRegion}
-        >
-          {issues.map((issue) => (
-            issue.location && (
-              <Marker
-                key={issue._id} // Use a unique identifier for the key
-                coordinate={{
-                  latitude: issue.location.latitude,
-                  longitude: issue.location.longitude,
-                }}
-                title={issue.description || 'No description'}
-              />
-            )
-          ))}
+        <MapView style={{ flex: 1 }} initialRegion={defaultRegion}>
+          {issues.map(
+            (issue) =>
+              issue.location && (
+                <Marker
+                  key={issue._id} // Use a unique identifier for the key
+                  coordinate={{
+                    latitude: issue.location.latitude,
+                    longitude: issue.location.longitude,
+                  }}
+                  title={issue.description || "No description"}
+                />
+              )
+          )}
         </MapView>
       )}
     </SafeAreaView>
