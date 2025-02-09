@@ -57,11 +57,9 @@ const LostScreen = () => {
   };
   const fetchItems = async () => {
     try {
-      console.log("Fetching items...");
       const response = await axios.get(
         "https://8e96-103-104-226-58.ngrok-free.app/api/items"
       );
-      console.log("Items:", response.data);
       setItems(response.data);
     } catch (error) {
       console.error("Error fetching items:", error);
