@@ -283,7 +283,7 @@ app.get("/api/issues", async (req, res) => {
 app.get("/api/found-items", async (req, res) => {
   try {
     const items = await found.find();
-    console.log(items);
+    console.log(items)
     res.json(items);
   } catch (error) {
     res.status(500).json({ message: "Error fetching items", error });
