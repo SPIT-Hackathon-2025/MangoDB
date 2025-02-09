@@ -179,16 +179,17 @@ app.post("/api/item-found", upload.single("image"), async (req, res) => {
 
     // Parse location to get latitude and longitude
     const parsedLocation = JSON.parse(location); // location should be a stringified object
-    console.log(location)
+    console.log(location);
     const { latitude, longitude } = parsedLocation;
-    
 
     // Get the actual address from latitude and longitude using reverse geocoding
     const address = await reverseGeocode(latitude, longitude);
 
     // If reverse geocoding fails
     if (!address) {
-      return res.status(500).json({ error: "Could not retrieve address from coordinates" });
+      return res
+        .status(500)
+        .json({ error: "Could not retrieve address from coordinates" });
     }
 
     // Create a new issue object with the address
@@ -248,6 +249,11 @@ app.post("/api/append-csv", (req, res) => {
     }
     res.json({ message: "Data appended successfully!" });
   });
+});
+app.get("/api/found/query", async (req, res) => {
+  const { description } = req.body;
+  console.log(description);
+  return res.json({ message: description });
 });
 
 const start = async () => {
