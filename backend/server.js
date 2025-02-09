@@ -178,12 +178,14 @@ app.post("/api/item-found", upload.single("image"), async (req, res) => {
     const { description, location } = req.body;
     const { path: imagePath } = req.file;
 
-    const parsedLocation = JSON.parse(location);
+    const parsedLocation = JSON.parse(location);;
     const { latitude, longitude } = parsedLocation;
 
     const address = await reverseGeocode(latitude, longitude);
     if (!address) {
-      return res.status(500).json({ error: "Could not retrieve address from coordinates" });
+      return res
+        .status(500)
+        .json({ error: "Could not retrieve address from coordinates" });
     }
 
     const newFound = new found({
@@ -320,6 +322,11 @@ app.post("/api/append-csv", (req, res) => {
     }
     res.json({ message: "Data appended successfully!" });
   });
+});
+app.get("/api/found/query", async (req, res) => {
+  const { description } = req.body;
+  console.log(description);
+  return res.json({ message: description });
 });
 
 const start = async () => {
