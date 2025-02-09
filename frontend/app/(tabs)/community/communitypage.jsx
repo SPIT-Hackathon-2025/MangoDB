@@ -103,7 +103,7 @@ export default function CommunityPage() {
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
         
         {/* Header Section */}
-        <View className=" bg-emerald-800 px-6 pt-10 pb-14 rounded-b-3xl shadow-md">
+        <View className=" bg-[#03543F] px-6 pt-10 pb-14 rounded-b-3xl shadow-md">
           <View className="flex-row items-center">
             <View className={`${bgColor} p-3 rounded-full`}>
               <MaterialIcons name="forum" size={28} color={iconColor.replace("text-", "")} />

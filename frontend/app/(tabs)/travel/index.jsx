@@ -35,7 +35,7 @@ export default function GreenTravel() {
       >
         {/* Enhanced Header Section */}
         <View
-          className="bg-emerald-800 px-6 pt-10 pb-14 rounded-b-[40px] shadow-lg"
+          className="bg-[#03543F] px-6 pt-10 pb-14 rounded-b-[40px] shadow-lg"
         >
           <View className="flex-row items-center justify-between mb-4">
             <Text className="text-white text-3xl font-bold">Greener Travel</Text>
