@@ -89,16 +89,16 @@ export default function EventPage() {
   return (
     <SafeAreaView className="flex-1 bg-gray-100">
       {/* Event Details Section */}
-      <View className="bg-[#03543F] px-6 pt-8 pb-6 rounded-b-3xl shadow-md">
-        <Text className="text-white text-2xl font-bold">{event.title}</Text>
+      <View className="bg-background px-6 pt-8 pb-6 rounded-b-3xl shadow-md">
+        <Text className="text-emerald-800 text-2xl font-pbold">{event.title}</Text>
         <View className="flex-row justify-between items-center mt-2">
-          <Text className="text-emerald-100 flex-row items-center">
-            <MaterialIcons name="calendar-today" size={16} color="#A7F3D0" /> {event.date}
+          <Text className="text-emerald-700 flex-row items-center">
+            <MaterialIcons name="calendar-today" size={16} color="#334155" /> {event.date}
           </Text>
-          <Text className="text-emerald-100">👥 {onlineUsers} Online</Text>
+          <Text className="text-green-800">👥 {onlineUsers} Online</Text>
         </View>
-        <Text className="text-emerald-100 mt-1 flex-row items-center">
-          <MaterialIcons name="location-on" size={16} color="#A7F3D0" /> {event.location}
+        <Text className="text-emerald-700 mt-1 flex-row items-center">
+          <MaterialIcons name="location-on" size={16} color="#334155" /> {event.location}
         </Text>
       </View>
 
